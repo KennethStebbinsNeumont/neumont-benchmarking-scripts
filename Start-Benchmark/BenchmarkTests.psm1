@@ -2,12 +2,17 @@ function Test-BIOSVersion
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestDescription,
+            [System.Management.Automation.PSCustomObject]$TestObj,
         [Parameter(Position=2)]
             [System.Management.Automation.PSCustomObject]$SysInfo=(Get-SystemInfo),
         [Parameter(Position=3)]
             [System.Management.Automation.PSCustomObject]$PersistentData=(Get-PersistentData)
     )
+
+    $result = $null
+
+    $valueObj = $TestObj.Results[0].Value
+
     $PersistentData = Get-PersistentData
 
     if($SysInfo.Manufacturer -eq "LENOVO") {
@@ -26,21 +31,25 @@ function Test-BIOSVersion
                 Write-Host -ForegroundColor Yellow "This machine's BIOS version ($biosVersion) is lower than the current BIOS version ($currentVersion)."
                 Write-Host -ForegroundColor Yellow "Update BIOS then reboot."
 
-                $TestObj.Results[0].Value.Value = $true
-                return New-PSObject @{ "Successful" = $false; "Message" = "BIOS out of date" }
+                Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
+                $result = New-PSObject @{ "Successful" = $false; "Message" = "BIOS out of date" }
             } elseif($biosVersion -gt $currentVersion) {
                 # If the database entry is out of date
                 Write-Host -ForegroundColor Cyan "This machine's BIOS version ($biosVersion) is higher than the database's current BIOS version ($currentVersion)."
                 $entry.BIOSVersion = $biosVersion
                 Write-Host -ForegroundColor Cyan "Database has been updated."
 
-                return New-PSObject @{ "Successful" = $true; "Message" = "BIOS up to date" }
+                Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
+                $result = New-PSObject @{ "Successful" = $true; "Message" = "BIOS up to date" }
             } else {
                 # If both BOS versions are the same
                 Write-Host -ForegroundColor Green "BIOS is up to date ($biosVersion)"
 
-                return New-PSObject @{ "Successful" = $true; "Message" = "BIOS up to date" }
+                Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
+                $result = New-PSObject @{ "Successful" = $true; "Message" = "BIOS up to date" }
             }
+
+            break
         }
     }
 
@@ -51,7 +60,9 @@ function Test-BIOSVersion
     Save-PersistentData $PersistentData
     Write-Host -ForegroundColor Cyan "Database has been updated."
 
-    return New-PSObject @{ "Successful" = $true; "Message" = "No associated BIOS info existed in database." }
+    $result = New-PSObject @{ "Successful" = $true; "Message" = "No associated BIOS info existed in database." }
+
+    return @{ "Result"=$result; "TestObj"=$TestObj; }
 }
 
 function Test-IPDT
@@ -60,6 +71,8 @@ function Test-IPDT
         [Parameter(Mandatory=$true,Position=1)]
             [System.Management.Automation.PSCustomObject]$TestObj
     )
+
+    $result = $null
     
     $valueObj = $TestObj.Results[0].Value
 
@@ -71,8 +84,10 @@ function Test-IPDT
 
     if($response -eq 'y' -or $response -eq 'Y') {
         Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
+        $result = New-PSObject @{ "Successful" = $true;}
     } else {
         Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
+        $result = New-PSObject @{ "Successful" = $false;}
     }
 
     if(!$process.HasExited) {
@@ -80,7 +95,7 @@ function Test-IPDT
         $process.WaitForExit()
     }
 
-    return $TestObj
+    return @{ "Result"=$result; "TestObj"=$TestObj; }
 }
 
 function Test-Cinebench
