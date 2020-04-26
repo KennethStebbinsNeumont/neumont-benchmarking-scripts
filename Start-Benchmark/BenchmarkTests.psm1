@@ -32,7 +32,7 @@ function Test-BIOSVersion
                 Write-Host -ForegroundColor Yellow "Update BIOS then reboot."
 
                 Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
-                $result = New-PSObject @{ "Successful" = $false; "Message" = "BIOS out of date" }
+                $result = @{ "Successful" = $false; "Message" = "BIOS out of date" }
             } elseif($biosVersion -gt $currentVersion) {
                 # If the database entry is out of date
                 Write-Host -ForegroundColor Cyan "This machine's BIOS version ($biosVersion) is higher than the database's current BIOS version ($currentVersion)."
@@ -40,13 +40,13 @@ function Test-BIOSVersion
                 Write-Host -ForegroundColor Cyan "Database has been updated."
 
                 Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
-                $result = New-PSObject @{ "Successful" = $true; "Message" = "BIOS up to date" }
+                $result = @{ "Successful" = $true; "Message" = "BIOS up to date" }
             } else {
                 # If both BOS versions are the same
                 Write-Host -ForegroundColor Green "BIOS is up to date ($biosVersion)"
 
                 Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
-                $result = New-PSObject @{ "Successful" = $true; "Message" = "BIOS up to date" }
+                $result = @{ "Successful" = $true; "Message" = "BIOS up to date" }
             }
 
             break
@@ -60,7 +60,7 @@ function Test-BIOSVersion
     Save-PersistentData $PersistentData
     Write-Host -ForegroundColor Cyan "Database has been updated."
 
-    $result = New-PSObject @{ "Successful" = $true; "Message" = "No associated BIOS info existed in database." }
+    $result = @{ "Successful" = $true; "Message" = "No associated BIOS info existed in database." }
 
     return @{ "Result"=$result; "TestObj"=$TestObj; }
 }
@@ -84,10 +84,10 @@ function Test-IPDT
 
     if($response -eq 'y' -or $response -eq 'Y') {
         Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
-        $result = New-PSObject @{ "Successful" = $true;}
+        $result = @{ "Successful" = $true; }
     } else {
         Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
-        $result = New-PSObject @{ "Successful" = $false;}
+        $result = @{ "Successful" = $false;}
     }
 
     if(!$process.HasExited) {
@@ -114,12 +114,21 @@ function Test-Cinebench
 
     $scoreResponse = Get-DoubleResponse -Prompt "What score did Cinebench give?: "
 
+    $testPassed = $true
+    $comments = @()
+
     if($scoreResponse -gt $scoreValueObj.Min) {
         if($scoreResponse -gt $scoreValueObj.Max) {
-            Write-Host -ForegroundColor Cyan "Score is greater than the expected maximum."
+            $comment = "Score was greater than the expected maximum."
+            Write-Host -ForegroundColor Cyan $comment
+            Add-Member -InputObject $scoreValueObj -NotePropertyName Comment -NotePropertyValue $comment
+            $comments += $comment
         }
     } else {
-        Write-Host -ForegroundColor Red "Score is lower than the expected minimum."
+        $comment = "Score was greater than the expected maximum."
+        Write-Host -ForegroundColor Red $comment
+        $comments += $comment
+        $testPassed = $false
     }
     Add-Member -InputObject $scoreValueObj -NotePropertyName Value -NotePropertyValue $scoreResponse
 
@@ -128,7 +137,18 @@ function Test-Cinebench
         $process.WaitForExit()
     }
 
-    return $TestObj
+    $commentString = ""
+    foreach($comment in $comments) {
+        if($commentString -ne "") {
+            $commentString += " $comment"
+        } else {
+            $commentString += "$comment"
+        }
+    }
+
+    $result = @{ "Successful" = $testPassed; "Message" = $commentString }
+
+    return @{ "Result"=$result; "TestObj"=$TestObj; }
 }
 
 function Test-FurMarkdGPU
@@ -150,21 +170,36 @@ function Test-FurMarkdGPU
     $scoreResponse = Get-DoubleResponse -Prompt "What score did FurMark give?: "
     $tempResponse = Get-DoubleResponse -Prompt "What average GPU core temperature did FurMark report?: "
 
+    $testPassed = $true
+    $comments = @()
+
     if($scoreResponse -gt $scoreValueObj.Min) {
         if($scoreResponse -gt $scoreValueObj.Max) {
-            Write-Host -ForegroundColor Cyan "Score was greater than the expected maximum."
+            $comment = "Score was greater than the expected maximum."
+            Write-Host -ForegroundColor Cyan $comment
+            Add-Member -InputObject $scoreValueObj -NotePropertyName Comment -NotePropertyValue $comment
+            $comments += $comment
         }
     } else {
-        Write-Host -ForegroundColor Red "Score was lower than the expected minimum."
+        $comment = "Score was lower than the expected minimum."
+        Write-Host -ForegroundColor Red $comment
+        $comments += $comment
+        $testPassed = $false
     }
     Add-Member -InputObject $scoreValueObj -NotePropertyName Value -NotePropertyValue $scoreResponse
     
     if($tempResponse -lt $tempValueObj.Max) {
         if($tempResponse -lt $tempValueObj.Min) {
-            Write-Host -ForegroundColor Cyan "Average GPU core temperature was lower than the expected minimum."
+            $comment = "Average GPU core temperature was lower than the expected minimum."
+            Write-Host -ForegroundColor Cyan $comment
+            Add-Member -InputObject $tempValueObj -NotePropertyName Comment -NotePropertyValue $comment
+            $comments += $comment
         }
     } else {
-        Write-Host -ForegroundColor Red "Average GPU core temperature was higher than the expected maximum."
+        $comment = "Average GPU core temperature was higher than the expected maximum."
+        Write-Host -ForegroundColor Red $comment
+        $comments += $comment
+        $testPassed = $false
     }
     Add-Member -InputObject $tempValueObj -NotePropertyName Value -NotePropertyValue $tempResponse
 
@@ -173,7 +208,18 @@ function Test-FurMarkdGPU
         $process.WaitForExit()
     }
 
-    return $TestObj
+    $commentString = ""
+    foreach($comment in $comments) {
+        if($commentString -ne "") {
+            $commentString += " $comment"
+        } else {
+            $commentString += "$comment"
+        }
+    }
+
+    $result = @{ "Successful" = $testPassed; "Message" = $commentString }
+
+    return @{ "Result"=$result; "TestObj"=$TestObj; }
 }
 
 function Test-FurMarkiGPU
@@ -193,23 +239,38 @@ function Test-FurMarkiGPU
     $process = Start-Process -FilePath "C:\Program Files\FurMark (iGPU)\FurMark.exe" -PassThru
 
     $scoreResponse = Get-DoubleResponse -Prompt "What score did FurMark give?: "
-    $tempResponse = Get-DoubleResponse -Prompt "What average GPU core temperature did FurMark report?: "
+    $tempResponse = Get-DoubleResponse -Prompt "What average Intel GPU core temperature did FurMark report?: "
+
+    $testPassed = $true
+    $comments = @()
 
     if($scoreResponse -gt $scoreValueObj.Min) {
         if($scoreResponse -gt $scoreValueObj.Max) {
-            Write-Host -ForegroundColor Cyan "Score was greater than the expected maximum."
+            $comment = "Score was greater than the expected maximum."
+            Write-Host -ForegroundColor Cyan $comment
+            Add-Member -InputObject $scoreValueObj -NotePropertyName Comment -NotePropertyValue $comment
+            $comments += $comment
         }
     } else {
-        Write-Host -ForegroundColor Red "Score was lower than the expected minimum."
+        $comment = "Score was lower than the expected minimum."
+        Write-Host -ForegroundColor Red $comment
+        $comments += $comment
+        $testPassed = $false
     }
     Add-Member -InputObject $scoreValueObj -NotePropertyName Value -NotePropertyValue $scoreResponse
     
     if($tempResponse -lt $tempValueObj.Max) {
         if($tempResponse -lt $tempValueObj.Min) {
-            Write-Host -ForegroundColor Cyan "Average GPU core temperature was lower than the expected minimum."
+            $comment = "Average GPU core temperature was lower than the expected minimum."
+            Write-Host -ForegroundColor Cyan $comment
+            Add-Member -InputObject $tempValueObj -NotePropertyName Comment -NotePropertyValue $comment
+            $comments += $comment
         }
     } else {
-        Write-Host -ForegroundColor Red "Average GPU core temperature was higher than the expected maximum."
+        $comment = "Average GPU core temperature was higher than the expected maximum."
+        Write-Host -ForegroundColor Red $comment
+        $comments += $comment
+        $testPassed = $false
     }
     Add-Member -InputObject $tempValueObj -NotePropertyName Value -NotePropertyValue $tempResponse
 
@@ -218,7 +279,18 @@ function Test-FurMarkiGPU
         $process.WaitForExit()
     }
 
-    return $TestObj
+    $commentString = ""
+    foreach($comment in $comments) {
+        if($commentString -ne "") {
+            $commentString += " $comment"
+        } else {
+            $commentString += "$comment"
+        }
+    }
+
+    $result = @{ "Successful" = $testPassed; "Message" = $commentString }
+
+    return @{ "Result"=$result; "TestObj"=$TestObj; }
 }
 
 function Test-Heaven
@@ -249,39 +321,71 @@ function Test-Heaven
     $gpuTempResponse = Get-DoubleResponse -Prompt "What average GPU core temperature did HWiNFO64 report?: "
     $cpuTempResponse = Get-DoubleResponse -Prompt "What average CPU max core temperaturee did HWiNFO64 report?: "
 
+    $testPassed = $true
+    $comments = @()
+    
     if($scoreResponse -gt $scoreValueObj.Min) {
         if($scoreResponse -gt $scoreValueObj.Max) {
-            Write-Host -ForegroundColor Cyan "Score was greater than expected maximum."
+            $comment = "Score was greater than the expected maximum."
+            Write-Host -ForegroundColor Cyan $comment
+            Add-Member -InputObject $scoreValueObj -NotePropertyName Comment -NotePropertyValue $comment
+            $comments += $comment
         }
     } else {
-        Write-Host -ForegroundColor Red "Score was lower than the expected minimum."
+        $comment = "Score was lower than the expected minimum."
+        Write-Host -ForegroundColor Red $comment
+        $comments += $comment
+        $testPassed = $false
     }
     Add-Member -InputObject $scoreValueObj -NotePropertyName Value -NotePropertyValue $scoreResponse
     
     if($gpuTempResponse -lt $gpuTempValueObj.Max) {
         if($gpuTempResponse -lt $gpuTempValueObj.Min) {
-            Write-Host -ForegroundColor Cyan "Average GPU core temperature was lower than the expected minimum."
+            $comment = "Average GPU core temperature was lower than the expected minimum."
+            Write-Host -ForegroundColor Cyan $comment
+            Add-Member -InputObject $gpuTempValueObj -NotePropertyName Comment -NotePropertyValue $comment
+            $comments += $comment
         }
     } else {
-        Write-Host -ForegroundColor Red "Average GPU core temperature was higher than the expected maximum."
+        $comment = "Average GPU core temperature was higher than the expected maximum."
+        Write-Host -ForegroundColor Red $comment
+        $comments += $comment
+        $testPassed = $false
     }
     Add-Member -InputObject $gpuTempValueObj -NotePropertyName Value -NotePropertyValue $gpuTempResponse
     
     if($cpuTempResponse -lt $cpuTempValueObj.Max) {
         if($cpuTempResponse -lt $cpuTempValueObj.Min) {
-            Write-Host -ForegroundColor Cyan "Average CPU max core temperature was lower than the expected minimum."
+            $comment = "Average CPU max core temperature was lower than the expected minimum."
+            Write-Host -ForegroundColor Cyan $comment
+            Add-Member -InputObject $cpuTempValueObj -NotePropertyName Comment -NotePropertyValue $comment
+            $comments += $comment
         }
     } else {
-        Write-Host -ForegroundColor Red "Average CPU max core temperature was higher than the expected maximum."
+        $comment = "Average CPU max core temperature was higher than the expected maximum."
+        Write-Host -ForegroundColor Red $comment
+        $comments += $comment
+        $testPassed = $false
     }
-    Add-Member -InputObject $cpuTempValueObj -NotePropertyName Value -NotePropertyValue $cpuTempResponse
+    Add-Member -InputObject $gpuTempValueObj -NotePropertyName Value -NotePropertyValue $gpuTempResponse
 
     if(!$process.HasExited) {
         Write-Host -ForegroundColor Cyan "Please close Heaven to continue (Do NOT close HWiNFO64)..."
         $process.WaitForExit()
     }
 
-    return $TestObj
+    $commentString = ""
+    foreach($comment in $comments) {
+        if($commentString -ne "") {
+            $commentString += " $comment"
+        } else {
+            $commentString += "$comment"
+        }
+    }
+
+    $result = @{ "Successful" = $testPassed; "Message" = $commentString }
+
+    return @{ "Result"=$result; "TestObj"=$TestObj; }
 }
 function Test-Prime95
 {
@@ -305,16 +409,23 @@ function Test-Prime95
 
     $tempResponse = Get-DoubleResponse -Prompt "What average CPU max core temperature did HWiNFO64 report?: "
     
+    $testPassed = $true
+    $comments = @()
+
     if($tempResponse -lt $tempValueObj.Max) {
         if($tempResponse -lt $tempValueObj.Min) {
-            Write-Host -ForegroundColor Cyan "Average GPU core temperature was lower than the expected minimum."
-            Add-Member -InputObject $tempResponse -NotePropertyName "Comment" -NotePropertyValue "Average GPU core temperature was lower than the expected minimum."
+            $comment = "Average CPU max core temperature was lower than the expected minimum."
+            Write-Host -ForegroundColor Cyan $comment
+            Add-Member -InputObject $tempResponse -NotePropertyName "Comment" -NotePropertyValue $comment
+            $comments += $comment
         }
     } else {
-        Write-Host -ForegroundColor Red "Average GPU core temperature was higher than the expected maximum."
-        Add-Member -InputObject $tempResponse -NotePropertyName "Comment" -NotePropertyValue "Average GPU core temperature was higher than the expected maximum."
+        $comment = "Average GPU core temperature was higher than the expected maximum."
+        Write-Host -ForegroundColor Red $comment
+        Add-Member -InputObject $tempResponse -NotePropertyName "Comment" -NotePropertyValue $comment
+        $comments += $comment
+        $testPassed = $false
     }
-
     Add-Member -InputObject $tempValueObj -NotePropertyName Value -NotePropertyValue $tempResponse
 
     if(!$prime95Process.HasExited) {
@@ -327,7 +438,18 @@ function Test-Prime95
         $hwinfoProcess.WaitForExit()
     }
 
-    return $TestObj
+    $commentString = ""
+    foreach($comment in $comments) {
+        if($commentString -ne "") {
+            $commentString += " $comment"
+        } else {
+            $commentString += "$comment"
+        }
+    }
+
+    $result = @{ "Successful" = $testPassed; "Message" = $commentString }
+
+    return @{ "Result"=$result; "TestObj"=$TestObj; }
 }
 
 function Test-MemTest64
@@ -346,14 +468,24 @@ function Test-MemTest64
     $process = Start-Process -FilePath "C:\Program Files\MemTest64\MemTest64.exe" -PassThru
 
     $response = Get-KeypressResponse -Prompt "Did the test pass? (Y/N/(S)kip): " -Options 'y','Y','n','N','s','S'
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+
+    $testPassed = $false
+    $testSkipped = $false
 
     if($response -eq 'y' -or $response -eq 'Y') {
         Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
+        $testPassed = $true
     } elseif($response -eq 'n' -or $response -eq 'N') {
         Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
     } else {
         # If skipped
         Add-Member -InputObject $valueObj -NotePropertyName Skipped -NotePropertyValue $true
+        $testSkipped = $true
+    }
+    
+    if($commentResponse -ne "") {
+        Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
     }
 
     if(!$process.HasExited) {
@@ -361,7 +493,13 @@ function Test-MemTest64
         $process.WaitForExit()
     }
 
-    return $TestObj
+    if($testSkipped) {
+        $result = @{ "Successful" = $false; "Message" = "Test skipped" }
+    } else {
+        $result = @{ "Successful" = $testPassed }
+    }
+
+    return @{ "Result"=$result; "TestObj"=$TestObj; }
 }
 
 function Test-WinMemDiag
@@ -378,34 +516,52 @@ function Test-WinMemDiag
         # Skip this test if MemTest64 started properly
         Write-Host -ForegroundColor White "Skipping this test..."
         Add-Member -InputObject $valueObj -NotePropertyName Skipped -NotePropertyValue $true
-        return $TestObj
+        Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue "Test skipped because MemTest64 was already run."
+        $result = @{ "Successful" = $false; "Message" = "Test skipped because MemTest64 was already run." }
+
+        return @{ "Result"=$result; "TestObj"=$TestObj; }
     }
 
-    $response = Get-KeypressResponse -Prompt "Have you already started this test? (Y/N): " -Options 'y','Y','n','N'
+    $response = Get-KeypressResponse -Prompt "Have you already started this test? (Y/N/(S)kip): " -Options 'y','Y','n','N','s','S'
+
+    $testSkipped = $false
+    $testPassed = $false
+
     if($response -eq 'n' -or $response -eq 'N') {
         # If the test hasn't been started yet
 
         Write-Host -ForegroundColor White "Wait until the test completes, then indicate whether the test passed."
         Write-Host -ForegroundColor White "This test indicates whether it passed via a notification in the notification center. It may take a few minutes to appear after rebooting."
 
-        Start-Process -FilePath "C:\Windows\System32\WindowsMemoryDiagnostic.exe" -PassThru
-    } else {
+        Start-Process -FilePath "C:\Windows\System32\WindowsMemoryDiagnostic.exe"
+    } elseif($response -eq 'y' -or $response -eq 'Y') {
         # If we're returning after rebooting
-
         $response = Get-KeypressResponse -Prompt "Did the test pass? (Y/N/(S)kip): " -Options 'y','Y','n','N','s','S'
+        $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
 
         if($response -eq 'y' -or $response -eq 'Y') {
             Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
+            $testPassed = $true
         } elseif($response -eq 'n' -or $response -eq 'N') {
             Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
         } else {
             # If skipped
             Add-Member -InputObject $valueObj -NotePropertyName Skipped -NotePropertyValue $true
+            $testSkipped = $true
         }
-
-        return $TestObj
+    
+        if($commentResponse -ne "") {
+            Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
+        }
     }
 
+    if($testSkipped) {
+        $result = @{ "Successful" = $false; "Message" = "Test skipped" }
+    } else {
+        $result = @{ "Successful" = $testPassed }
+    }
+
+    return @{ "Result"=$result; "TestObj"=$TestObj; }
 }
 
 # Exports
