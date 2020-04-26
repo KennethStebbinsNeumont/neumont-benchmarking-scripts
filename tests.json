@@ -1,0 +1,270 @@
+[
+    {
+        "Name": "BIOS Version Check",
+        "Description": "Check the BIOS version of the machine and verify that it is up to date.",
+        "Command": "Test-BIOSVersion",
+        "Results": [
+            {
+                "Name": "BIOS Up-to-date",
+                "Description": "Wether the currently installed BIOS version is the most recent version available.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            }
+        ],
+        "StopOnFail": true
+    },
+    {
+        "Name": "Intel Processor Diagnostic Tool",
+        "Description": "Run IPDT and ensure that all tests pass.",
+        "Command": "Test-IPDT",
+        "Results": [
+            {
+                "Name": "All Tests Passed",
+                "Description": "Whether all of the tests in IPDT passed.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            }
+        ],
+        "StopOnFail": true
+    },
+    {
+        "Name": "Cinebench",
+        "Description": "A multi-core CPU-based rendering benchmark.",
+        "Command": "Test-Cinebench",
+        "Results": [
+            {
+                "Name": "Score",
+                "Description": "Cinebench's proprietary benchmark score. Higher is better.",
+                "Type": "Number",
+                "Unit": "cb",
+                "HigherIsBetter": true,
+                "Values": [
+                    {
+                        "Model": "Precision 5520",
+                        "Min": 1450,
+                        "Max": 1750
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "FurMark (dGPU)",
+        "Description": "A GPU rendering benchmark, run on the dedicated graphics processor.",
+        "Command": "Test-FurMarkdGPU",
+        "Results": [
+            {
+                "Name": "Score",
+                "Description": "FurMark's proprietary benchmark score. Higher is better.",
+                "Type": "Number",
+                "Unit": "points",
+                "HigherIsBetter": true,
+                "Values": [
+                    {
+                        "Model": "Precision 5520",
+                        "Min": 1200,
+                        "Max": 1300
+                    }
+                ]
+            },
+            {
+                "Name": "Average GPU Core Temperature",
+                "Description": "The average temperature of the GPU during the test, measured in Celcius. Lower is better.",
+                "Type": "Number",
+                "Unit": "°C",
+                "HigherIsBetter": false,
+                "Values": [
+                    {
+                        "Model": "Precision 5520",
+                        "Min": 75,
+                        "Max": 90
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "FurMark (iGPU)",
+        "Description": "A GPU rendering benchmark, run on the integrated graphics processor.",
+        "Command": "Test-FurMarkiGPU",
+        "Results": [
+            {
+                "Name": "Score",
+                "Description": "FurMark's proprietary benchmark score. Higher is better.",
+                "Type": "Number",
+                "Unit": "points",
+                "HigherIsBetter": true,
+                "Values": [
+                    {
+                        "Model": "Precision 5520",
+                        "Min": 625,
+                        "Max": 700
+                    }
+                ]
+            },
+            {
+                "Name": "Average GPU Core Temperature",
+                "Description": "The average temperature of the GPU during the test, measured in Celcius. Lower is better.",
+                "Type": "Number",
+                "Unit": "°C",
+                "HigherIsBetter": false,
+                "Values": [
+                    {
+                        "Model": "Precision 5520",
+                        "Min": 75,
+                        "Max": 90
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "Heaven",
+        "Description": "A benchmark that emulates playing a video game.",
+        "Command": "Test-Heaven",
+        "Results": [
+            {
+                "Name": "Score",
+                "Description": "Heaven's proprietary benchmark score. Higher is better.",
+                "Type": "Number",
+                "Unit": "points",
+                "HigherIsBetter": true,
+                "Values": [
+                    {
+                        "Model": "Precision 5520",
+                        "Min": 700,
+                        "Max": 900
+                    }
+                ]
+            },
+            {
+                "Name": "Average GPU Core Temperature",
+                "Description": "The average temperature of the GPU during the test, measured in Celcius. Lower is better.",
+                "Type": "Number",
+                "Unit": "°C",
+                "HigherIsBetter": false,
+                "Values": [
+                    {
+                        "Model": "Precision 5520",
+                        "Min": 75,
+                        "Max": 95
+                    }
+                ]
+            },
+            {
+                "Name": "Average CPU Max Core Temperature",
+                "Description": "The average temperature of the hottest core of the CPU during the test, measured in Celcius. Lower is better.",
+                "Type": "Number",
+                "Unit": "°C",
+                "HigherIsBetter": false,
+                "Values": [
+                    {
+                        "Model": "Precision 5520",
+                        "Min": 75,
+                        "Max": 95
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "Prime95 (Small FFTs)",
+        "Description": "A CPU torture test designed to output as much heat as the CPU can.",
+        "Command": "Test-Prime95",
+        "Results": [
+            {
+                "Name": "Average CPU Max Core Temperature",
+                "Description": "The average temperature of the hottest core of the CPU during the test, measured in Celcius. Lower is better.",
+                "Type": "Number",
+                "Unit": "°C",
+                "HigherIsBetter": false,
+                "Values": [
+                    {
+                        "Model": "Precision 5520",
+                        "Min": 80,
+                        "Max": 99
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "MemTest64",
+        "Description": "A RAM stress test designed to test the stability of the system's memory. Test the total capacity of the system's memory, minus 2GB.",
+        "Command": "Test-MemTest64",
+        "Results": [
+            {
+                "Name": "No Errors Detected",
+                "Description": "The test passed without any errors.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "Basics: USB Port and SD Card Reader Test",
+        "Description": "Test every USB port on the machine and verify that data can be read through them.",
+        "Command": "Test-Basics",
+        "Results": [
+            {
+                "Name": "Left USB-A Port Works",
+                "Description": "Whether data can be read through the left USB-A port.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "Precision 5520",
+                        "Expected": true
+                    }
+                ]
+            },
+            {
+                "Name": "Left USB-C Port Works",
+                "Description": "Whether data can be read through the left USB-C port.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "Precision 5520",
+                        "Expected": true
+                    }
+                ]
+            },
+            {
+                "Name": "Right USB-A Port Works",
+                "Description": "Whether data can be read through the right USB-A port.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "Precision 5520",
+                        "Expected": true
+                    }
+                ]
+            },
+            {
+                "Name": "SD Card Reader Works",
+                "Description": "Whether data can be read through the SD card reader.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            }
+        ]
+    }
+]

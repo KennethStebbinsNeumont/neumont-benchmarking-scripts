@@ -1,0 +1,1 @@
+﻿explorer.exe "https://keyboardtester.com/tester.html"

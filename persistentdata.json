@@ -1,0 +1,19 @@
+{
+    "CurrentBIOSVersions": [
+        {
+            "Manufacturer": "LENOVO",
+            "Model": "20QU*",
+            "BIOSVersion": "N2OET43W"
+        },
+        {
+            "Manufacturer": "LENOVO",
+            "Model": "20ME*",
+            "BIOSVersion": "N2EET46W"
+        },
+        {
+            "Manufacturer": "DELL",
+            "Model": "Precision 5520",
+            "BIOSVersion": "1.18.0"
+        }
+    ]
+}
