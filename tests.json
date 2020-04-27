@@ -2,7 +2,7 @@
     {
         "Name": "BIOS Version Check",
         "Description": "Check the BIOS version of the machine and verify that it is up to date.",
-        "Command": "Test-BIOSVersion",
+        "CommandName": "BIOSVersion",
         "Results": [
             {
                 "Name": "BIOS Up-to-date",
@@ -21,7 +21,7 @@
     {
         "Name": "Intel Processor Diagnostic Tool",
         "Description": "Run IPDT and ensure that all tests pass.",
-        "Command": "Test-IPDT",
+        "CommandName": "IPDT",
         "Results": [
             {
                 "Name": "All Tests Passed",
@@ -40,7 +40,7 @@
     {
         "Name": "Cinebench",
         "Description": "A multi-core CPU-based rendering benchmark.",
-        "Command": "Test-Cinebench",
+        "CommandName": "Cinebench",
         "Results": [
             {
                 "Name": "Score",
@@ -61,7 +61,7 @@
     {
         "Name": "FurMark (dGPU)",
         "Description": "A GPU rendering benchmark, run on the dedicated graphics processor.",
-        "Command": "Test-FurMarkdGPU",
+        "CommandName": "FurMarkdGPU",
         "Results": [
             {
                 "Name": "Score",
@@ -96,7 +96,7 @@
     {
         "Name": "FurMark (iGPU)",
         "Description": "A GPU rendering benchmark, run on the integrated graphics processor.",
-        "Command": "Test-FurMarkiGPU",
+        "CommandName": "FurMarkiGPU",
         "Results": [
             {
                 "Name": "Score",
@@ -131,7 +131,7 @@
     {
         "Name": "Heaven",
         "Description": "A benchmark that emulates playing a video game.",
-        "Command": "Test-Heaven",
+        "CommandName": "Heaven",
         "Results": [
             {
                 "Name": "Score",
@@ -180,7 +180,7 @@
     {
         "Name": "Prime95 (Small FFTs)",
         "Description": "A CPU torture test designed to output as much heat as the CPU can.",
-        "Command": "Test-Prime95",
+        "CommandName": "Prime95",
         "Results": [
             {
                 "Name": "Average CPU Max Core Temperature",
@@ -201,7 +201,25 @@
     {
         "Name": "MemTest64",
         "Description": "A RAM stress test designed to test the stability of the system's memory. Test the total capacity of the system's memory, minus 2GB.",
-        "Command": "Test-MemTest64",
+        "CommandName": "MemTest64",
+        "Results": [
+            {
+                "Name": "No Errors Detected",
+                "Description": "The test passed without any errors.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "Windows Memory Diagnostic",
+        "Description": "A RAM stress test designed to test the stability of the system's memory. Use this one only if MemTest64 fails to start.",
+        "CommandName": "WinMemDiag",
         "Results": [
             {
                 "Name": "No Errors Detected",
@@ -219,7 +237,7 @@
     {
         "Name": "Basics: USB Port and SD Card Reader Test",
         "Description": "Test every USB port on the machine and verify that data can be read through them.",
-        "Command": "Test-Basics",
+        "CommandName": "BasicsUSB",
         "Results": [
             {
                 "Name": "Left USB-A Port Works",
