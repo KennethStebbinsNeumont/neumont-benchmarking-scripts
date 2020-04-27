@@ -260,6 +260,26 @@ function Get-Tests
     return $applicableTests
 }
 
+function Clear-Screen
+{
+    Param(
+        [System.Management.Automation.Host.Coordinates]
+            $BeginningPosition=(New-Object System.Management.Automation.Host.Coordinates)
+    )
+
+    $windowSize = $host.UI.RawUI.WindowSize
+    $windowPosition = $host.UI.RawUI.WindowPosition
+    
+    $host.UI.RawUI.CursorPosition = $BeginningPosition
+
+    # Clear the first row, leaving any characters to the left alone
+    Write-Host (' ' * $windowSize.Width - $BeginningPosition.X)
+
+    foreach($row in 0..($windowSize.Height + $windowPosition.Y - $BeginningPosition.Y + 1)) {
+        Write-Host (' ' * $windowSize.Width)
+    }
+}
+
 # Exports
 Export-ModuleMember -Function "Convert-WildcardToRegex"
 Export-ModuleMember -Function "New-PSObject"
