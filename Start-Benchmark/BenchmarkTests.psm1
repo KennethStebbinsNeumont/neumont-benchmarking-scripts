@@ -564,6 +564,417 @@ function Test-WinMemDiag
     return @{ "Result"=$result; "TestObj"=$TestObj; }
 }
 
+function Test-BasicsUSB
+{
+    Param(
+        [Parameter(Mandatory=$true,Position=1)]
+            [System.Management.Automation.PSCustomObject]$TestObj
+    )
+
+    $cursorPositionBeforeTest = $host.UI.RawUI.CursorPosition
+    $testPassed = $true
+    foreach($result in $TestObj.Results) {
+        Write-Host -ForegroundColor White $result.Name
+        Write-Host -ForegroundColor White "Please connect a drive to the port indicated above."
+
+        $cursorPositionBeforeLoop = $host.UI.RawUI.CursorPosition
+        $removableDrive = $null
+        $continue = $true
+        while($continue) {
+            foreach($i in (0..15)) {
+                # Wait for 5 seconds for the drive to appear
+                $removableDrive = Get-PSDrive | Where-Object { $_.Provider.Name -eq "FileSystem" -and $_.Root -notmatch $env:SystemDrive }
+                if($null -eq $removableDrive) {
+                    Write-Host -ForegroundColor Red "`rNo removable drive detected. $(5 - [math]::Floor($i / 4)) second(s) remaining." -NoNewline
+                    Start-Sleep -Milliseconds 250
+                } else {
+                    Write-Host -ForegroundColor Green "`rRemovable drive $($removableDrive.Name) detected."
+                    break
+                }
+            }
+            
+            if($null -eq $removableDrive) {
+                Write-Host -ForegroundColor Yellow "`rNo removable drive was detected."
+                $response = Get-KeypressResponse -Prompt "Try this port again? (Y/N): " -Options 'y','Y','n','N'
+    
+                if($response -eq 'n' -or $response -eq 'N') {
+                    Write-Host -ForegroundColor Yellow "Marking this port as failed."
+                    Add-Member -InputObject $result.Value -NotePropertyName Value -NotePropertyValue $false
+                    Add-Member -InputObject $result.Value -NotePropertyName Comment -NotePropertyValue "This port did not detect any drives."
+                    $continue = $false
+                    $testPassed = $false
+                }
+            } else {
+                $response = Get-KeypressResponse -Prompt "Can you read/write from/to the drive? (Y/N): " -Options 'y','Y','n','N'
+
+                if($response -eq 'y' -or $response -eq 'Y') {
+                    Add-Member -InputObject $result.Value -NotePropertyName Value -NotePropertyValue $true
+                    $continue = $false
+                } else {
+                    $response = Get-KeypressResponse -Prompt "Try this port again? (Y/N): " -Options 'y','Y','n','N'
+        
+                    if($response -eq 'n' -or $response -eq 'N') {
+                        Write-Host -ForegroundColor Yellow "Marking this port as failed."
+                        Add-Member -InputObject $result.Value -NotePropertyName Value -NotePropertyValue $false
+                        Add-Member -InputObject $result.Value -NotePropertyName Comment -NotePropertyValue "This port could not be written to or read from."
+                        $continue = $false
+                        $testPassed = $false
+                    }
+                }
+            }
+        }
+
+    }
+
+    return @{ "Result"=@{ "Successful" = $testPassed }; "TestObj"=$TestObj; }
+}
+
+function Test-BasicsDisplay
+{
+    Param(
+        [Parameter(Mandatory=$true,Position=1)]
+            [System.Management.Automation.PSCustomObject]$TestObj
+    )
+
+    $testPassed = $true
+    
+    $lcdValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "No LCD Defects Detected"
+
+    Write-Host -ForegroundColor White "Test the display showing all white, black, red, green and blue."
+    Write-Host -ForegroundColor White "Search for light spots, stuck pixels, and scratches in the top layer."
+
+    $process = Start-Process -FilePath "C:\Program Files\MonitorTest\MonitorTest.exe" -PassThru
+
+    $response = Get-KeypressResponse -Prompt "Did the display pass? (Y/N): " -Options "y","Y","n","N"
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+
+    if($response -eq 'y' -or $response -eq 'Y') {
+        Add-Member -InputObject $lcdValueObj -NotePropertyName Value -NotePropertyValue $true
+    } else {
+        Add-Member -InputObject $lcdValueObj -NotePropertyName Value -NotePropertyValue $false
+        $testPassed = $false
+    }
+    
+    if($commentResponse -ne "") {
+        Add-Member -InputObject $lcdValueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
+    }
+
+    if(!$process.HasExited) {
+        Write-Host -ForegroundColor Cyan "Please close MonitorTest to continue..."
+        $process.WaitForExit()
+    }
+
+    $touchValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Touchscreen Works"
+    if($null -ne $touchValueObj) {
+        # If we should also test the touch display.
+        Write-Host -ForegroundColor White "Touchscreen Test."
+        $process = Start-Process "www.neumont.edu"
+        Write-Host -ForegroundColor White "Go to the web page and test that you can pinch zoom on it."
+        if(!$process.HasExited) {
+            Write-Host -ForegroundColor Cyan "Please close the browser to continue..."
+            $process.WaitForExit()
+        }
+        Write-Host -ForegroundColor White "On the desktop, test dragging an icon around to all four corners of the display, then back to the center."
+        Write-Host -ForegroundColor White "On the desktop, tap with 5 fingers and verify that all 5 taps appear."
+
+        $response = Get-KeypressResponse -Prompt "Did the touch tests pass? (Y/N): " -Options "y","Y","n","N"
+        $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+
+        if($response -eq 'y' -or $response -eq 'Y') {
+            Add-Member -InputObject $touchValueObj -NotePropertyName Value -NotePropertyValue $true
+        } else {
+            Add-Member -InputObject $touchValueObj -NotePropertyName Value -NotePropertyValue $false
+            $testPassed = $false
+        }
+        
+        if($commentResponse -ne "") {
+            Add-Member -InputObject $touchValueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
+        }
+    }
+
+    return @{ "Result"=@{"Successful"=$testPassed}; "TestObj"=$TestObj; }
+}
+
+function Test-BasicsHDMI
+{
+    Param(
+        [Parameter(Mandatory=$true,Position=1)]
+            [System.Management.Automation.PSCustomObject]$TestObj
+    )
+
+    $result = $null
+    
+    $valueObj = $TestObj.Results[0].Value
+
+    Write-Host -ForegroundColor White "Connect the machine to an HDMI monitor and verify that an image from the laptop is displayed."
+    Write-Host -ForegroundColor Yellow "Wait for a minimum of 30 seconds after connecting to the display before marking this test as failed."
+
+    $response = Get-KeypressResponse -Prompt "Was an image displayed? (Y/N): " -Options "y","Y","n","N"
+
+    if($response -eq 'y' -or $response -eq 'Y') {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
+        $result = @{ "Successful" = $true; }
+    } else {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
+        $result = @{ "Successful" = $false;}
+    }
+
+    return @{ "Result"=$result; "TestObj"=$TestObj; }
+}
+
+function Test-BasicsSound
+{
+    Param(
+        [Parameter(Mandatory=$true,Position=1)]
+            [System.Management.Automation.PSCustomObject]$TestObj
+    )
+
+    $testPassed = $true
+    
+    $valueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Speakers Passed"
+
+    Write-Host -ForegroundColor White "Play the windows test tone and listen for channel balance, speaker rattling, or sound distortion."
+    Write-Host -ForegroundColor Yellow "Verify beforehand that `"Audio Enhancemens`" are off in the speakers sound device advanced settings."
+
+    $response = Get-KeypressResponse -Prompt "Do the speakers sound balanced and free from rattling and distortion? (Y/N): " -Options "y","Y","n","N"
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+
+    if($response -eq 'y' -or $response -eq 'Y') {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
+    } else {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
+        $testPassed = $false
+    }
+    
+    if($commentResponse -ne "") {
+        Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
+    }
+
+    $valueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Headphone Jack Passed"
+
+    Write-Host -ForegroundColor White "Connect headphones to the headphone jack, then play the windows test tone and listen for channel balance."
+
+    $response = Get-KeypressResponse -Prompt "Do the sound balanced? (Y/N): " -Options "y","Y","n","N"
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+
+    if($response -eq 'y' -or $response -eq 'Y') {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
+    } else {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
+        $testPassed = $false
+    }
+    
+    if($commentResponse -ne "") {
+        Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
+    }
+
+    return @{ "Result"=$testPassed; "TestObj"=$TestObj; }
+}
+
+function Test-BasicsNetwork
+{
+    Param(
+        [Parameter(Mandatory=$true,Position=1)]
+            [System.Management.Automation.PSCustomObject]$TestObj
+    )
+
+    $testPassed = $true
+    
+    $valueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Wi-Fi Connection Works"
+
+    Write-Host -ForegroundColor White "Connect to Wi-Fi and verify that a webpage can be loaded."
+    
+    netsh wlan connect name=Neumont
+    $process = Start-Process "www.msn.com" -PassThru
+
+    $response = Get-KeypressResponse -Prompt "Did the webpage load? (Y/N): " -Options "y","Y","n","N"
+
+    if($response -eq 'y' -or $response -eq 'Y') {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
+    } else {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
+        $testPassed = $false
+    }
+    netsh wlan disconnect
+
+    $wiredValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Wired Connection Works"
+    if($null -ne $wiredValueObj) {
+        # If we should also test the touch display.
+        Write-Host -ForegroundColor White "Connect the wired network adapter and verify that a webpage can be loaded."
+        $process = Start-Process "www.yahoo.com"
+        $response = Get-KeypressResponse -Prompt "Did the webpage load? (Y/N): " -Options "y","Y","n","N"
+
+        if($response -eq 'y' -or $response -eq 'Y') {
+            Add-Member -InputObject $wiredValueObj -NotePropertyName Value -NotePropertyValue $true
+        } else {
+            Add-Member -InputObject $wiredValueObj -NotePropertyName Value -NotePropertyValue $false
+            $testPassed = $false
+        }
+
+        Write-Host -ForegroundColor Cyan "Please disconnect the wired network adapter."
+    }
+
+    if(!$process.HasExited) {
+        Write-Host -ForegroundColor Cyan "Please close the web browser to continue..."
+        $process.WaitForExit()
+    }
+
+    return @{ "Result"=@{"Successful"=$testPassed}; "TestObj"=$TestObj; }
+}
+
+function Test-BasicsKeyboard
+{
+    Param(
+        [Parameter(Mandatory=$true,Position=1)]
+            [System.Management.Automation.PSCustomObject]$TestObj
+    )
+
+    $testPassed = $true
+    
+    $valueObj = $TestObj.Results[0].Value
+
+    Write-Host -ForegroundColor White "Go to keyboardtester.com/tester.html and verify that every keyboard key registers in the OS."
+
+    netsh wlan connect name=Neumont
+    $process = Start-Process "www.keyboardtester.com/tester.html" -PassThru
+
+    $response = Get-KeypressResponse -Prompt "Did all the keys register? (Y/N): " -Options "y","Y","n","N"
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+
+    if($response -eq 'y' -or $response -eq 'Y') {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
+    } else {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
+        $testPassed = $false
+    }
+    
+    if($commentResponse -ne "") {
+        Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
+    }
+
+    netsh wlan disconnect
+
+    if(!$process.HasExited) {
+        Write-Host -ForegroundColor Cyan "Please close the web browser to continue..."
+        $process.WaitForExit()
+    }
+
+    return @{ "Result"=@{"Successful" = $testPassed}; "TestObj"=$TestObj; }
+}
+
+function Test-BasicsCursor
+{
+    Param(
+        [Parameter(Mandatory=$true,Position=1)]
+            [System.Management.Automation.PSCustomObject]$TestObj
+    )
+
+    $testPassed = $true
+    
+    $valueObj = $TestObj.Results[0].Value
+
+    Write-Host -ForegroundColor White "Use the trackpad to move the cursor, left click, right click, and scroll."
+
+    $response = Get-KeypressResponse -Prompt "Did all the trackpad work normally? (Y/N): " -Options "y","Y","n","N"
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+
+    if($response -eq 'y' -or $response -eq 'Y') {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
+    } else {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
+        $testPassed = $false
+    }
+    
+    if($commentResponse -ne "") {
+        Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
+    }
+
+    $trackpointValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Wired Connection Works"
+    if($null -ne $trackpointValueObj) {
+        # If we should also test the touch display.
+        Write-Host -ForegroundColor White "Use the TrackPoint to move the cursor, left click, right click, and scroll."
+        $response = Get-KeypressResponse -Prompt "Did the TrackPoint work normally? (Y/N): " -Options "y","Y","n","N"
+        $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+
+        if($response -eq 'y' -or $response -eq 'Y') {
+            Add-Member -InputObject $trackpointValueObj -NotePropertyName Value -NotePropertyValue $true
+        } else {
+            Add-Member -InputObject $trackpointValueObj -NotePropertyName Value -NotePropertyValue $false
+            $testPassed = $false
+        }
+    
+        if($commentResponse -ne "") {
+            Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
+        }
+    }
+
+    return @{ "Result"=@{"Successful" = $testPassed}; "TestObj"=$TestObj; }
+}
+
+function Test-BasicsCamera
+{
+    Param(
+        [Parameter(Mandatory=$true,Position=1)]
+            [System.Management.Automation.PSCustomObject]$TestObj
+    )
+
+    $result = $null
+    
+    $valueObj = $TestObj.Results[0].Value
+
+    Write-Host -ForegroundColor White "Open the Camera application and verify that the camera is working normally."
+   
+    $process = Start-Process "C:\Program Files\Camera\Camera.exe" -PassThru
+
+    $response = Get-KeypressResponse -Prompt "Is the camera working normally? (Y/N): " -Options "y","Y","n","N"
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+
+    if($response -eq 'y' -or $response -eq 'Y') {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
+        $result = @{ "Successful" = $true; }
+    } else {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
+        $result = @{ "Successful" = $false; }
+    }
+    
+    if($commentResponse -ne "") {
+        Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
+    }
+
+    return @{ "Result"=$result; "TestObj"=$TestObj; }
+}
+
+function Test-BasicsPhysical
+{
+    Param(
+        [Parameter(Mandatory=$true,Position=1)]
+            [System.Management.Automation.PSCustomObject]$TestObj
+    )
+
+    $result = $null
+    
+    $valueObj = $TestObj.Results[0].Value
+
+    Write-Host -ForegroundColor White "Push down on the machine's keyboard, then pick the machine up and twist the chassis from the corners."
+
+    $response = Get-KeypressResponse -Prompt "Is the machine still operating normally? (Y/N): " -Options "y","Y","n","N"
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+
+    if($response -eq 'y' -or $response -eq 'Y') {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
+        $result = @{ "Successful" = $true; }
+    } else {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
+        $result = @{ "Successful" = $false;}
+    }
+    
+    if($commentResponse -ne "") {
+        Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
+    }
+
+    return @{ "Result"=$result; "TestObj"=$TestObj; }
+}
+
 # Exports
 Export-ModuleMember -Function "Test-BIOSVersion"
 Export-ModuleMember -Function "Test-IPDT"
@@ -574,3 +985,12 @@ Export-ModuleMember -Function "Test-Heaven"
 Export-ModuleMember -Function "Test-Prime95"
 Export-ModuleMember -Function "Test-MemTest64"
 Export-ModuleMember -Function "Test-WinMemDiag"
+Export-ModuleMember -Function "Test-BasicsUSB"
+Export-ModuleMember -Function "Test-BasicsDisplay"
+Export-ModuleMember -Function "Test-BasicsHDMI"
+Export-ModuleMember -Function "Test-BasicsSound"
+Export-ModuleMember -Function "Test-BasicsNetwork"
+Export-ModuleMember -Function "Test-BasicsKeyboard"
+Export-ModuleMember -Function "Test-BasicsCursor"
+Export-ModuleMember -Function "Test-BasicsCamera"
+Export-ModuleMember -Function "Test-BasicsPhysical"

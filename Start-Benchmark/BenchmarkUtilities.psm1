@@ -264,20 +264,30 @@ function Clear-Screen
 {
     Param(
         [System.Management.Automation.Host.Coordinates]
-            $BeginningPosition=(New-Object System.Management.Automation.Host.Coordinates)
+            $BeginningPosition
     )
 
     $windowSize = $host.UI.RawUI.WindowSize
     $windowPosition = $host.UI.RawUI.WindowPosition
+
+    if(!$BeginningPosition) {
+        # If no beginning position was given, use the window's position
+        $BeginningPosition = $windowPosition
+    }
     
     $host.UI.RawUI.CursorPosition = $BeginningPosition
 
     # Clear the first row, leaving any characters to the left alone
     Write-Host (' ' * $windowSize.Width - $BeginningPosition.X)
 
-    foreach($row in 0..($windowSize.Height + $windowPosition.Y - $BeginningPosition.Y + 1)) {
+    foreach($row in 0..($windowSize.Height + $windowPosition.Y - $BeginningPosition.Y + 2)) {
         Write-Host (' ' * $windowSize.Width)
     }
+
+    $host.UI.RawUI.CursorPosition = $BeginningPosition
+
+    return @{ "WindowSize" = $windowSize; "WindowPosition" = $windowPosition;
+                "BeginningPosition" = $BeginningPosition;}
 }
 
 # Exports
