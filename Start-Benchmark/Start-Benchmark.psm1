@@ -2,7 +2,8 @@
 {
     [CmdletBinding()]
     Param(
-        [String]$DBDirectoryPath=(Get-Location).Path,
+        [Parameter(Mandatory=$true)]
+            [String]$DBDirectoryPath,
         [String]$ResultDataFilePath,
         [Switch]$RestartTest
     )
@@ -17,7 +18,7 @@
         # If a file path was not given
         $dateString = Get-Date -Format "yyyyMMdd"
 
-        $currentPath = Get-Location.Path
+        $currentPath = $DBDirectoryPath
 
         $matchedFiles = Get-ChildItem -LiteralPath $currentPath | Where-Object {$_.Name -match "$dateString-.*-$($systemInfo.SerialNumber)-results\.json"}
 
@@ -68,24 +69,22 @@
     }
 
     $i = 1
-    foreach($test in Get-Tests) {
+    foreach($test in Get-Tests -FilePath "$DBDirectoryPath\tests.json") {
         Write-Host -ForegroundColor Magenta "Running test #$i"
         Write-Host -ForegroundColor White $test.Name
         Write-Host -ForegroundColor Gray $test.Description
 
         $command = Get-Command -Verb "Test" -Noun $test.CommandName -Module "BenchmarkTests"
 
-        $result = 
+        $result = &"$command" -TestObj $test
 
-        if(!$result.Successful) {
-            Write-Host -ForegroundColor Red "Test `"$($test.Name)`" failed: $($result.Message)"
+        if(!$result.Result.Successful) {
+            Write-Host -ForegroundColor Red "Test `"$($test.Name)`" failed: $($result.Result.Message)"
             if($test.StopOnFail) {
                 Write-Host -ForegroundColor Red "This test must pass before the others can continue. Exiting now..."
                 break
             }
         }
-
-        $resultData
 
         $i += 1
     }

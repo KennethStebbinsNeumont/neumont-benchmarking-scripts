@@ -2,11 +2,11 @@ function Test-BIOSVersion
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj,
+            [Object]$TestObj,
         [Parameter(Position=2)]
-            [System.Management.Automation.PSCustomObject]$SysInfo=(Get-SystemInfo),
+            [Object]$SysInfo=(Get-SystemInfo),
         [Parameter(Position=3)]
-            [System.Management.Automation.PSCustomObject]$PersistentData=(Get-PersistentData)
+            [Object]$PersistentData=(Get-PersistentData)
     )
 
     $result = $null
@@ -15,12 +15,11 @@ function Test-BIOSVersion
 
     $PersistentData = Get-PersistentData
 
-    if($SysInfo.Manufacturer -eq "LENOVO") {
-        $biosVersion = Convert-WildcardToRegex $SysInfo.BiosVersion
-    } else {
-        $biosVersion = $SysInfo.BiosVersion
-    }
+    $biosVersion = $SysInfo.BiosVersion
 
+    if(!$PersistentData.CurrentBIOSVersions) {
+        Add-Member -InputObject $PersistentData -NotePropertyName "CurrentBIOSVersions" -NotePropertyValue @()
+    }
     foreach($entry in $PersistentData.CurrentBIOSVersions) {
         if(Test-SysInfoMatch -SysInfo $SysInfo -Manufacturer $entry.Manufacturer -Model $entry.Model) {
             # If we've found this machine's model in the PersistentData current bios version database
@@ -37,6 +36,7 @@ function Test-BIOSVersion
                 # If the database entry is out of date
                 Write-Host -ForegroundColor Cyan "This machine's BIOS version ($biosVersion) is higher than the database's current BIOS version ($currentVersion)."
                 $entry.BIOSVersion = $biosVersion
+                Save-PersistentData $PersistentData
                 Write-Host -ForegroundColor Cyan "Database has been updated."
 
                 Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
@@ -53,14 +53,16 @@ function Test-BIOSVersion
         }
     }
 
-    # If no matching models were found in the database, create the entry
-    Write-Host -ForegroundColor Yellow "No matching BIOS information found in database."
-    $PersistentData.CurrentBIOSVersions += New-PSObject @{ "Manufacturer" = $sysInfo.Manufacturer; 
-                                                                "Model" = $sysInfo.Model; "BIOSVersion" = $sysInfo.BIOSVersion }
-    Save-PersistentData $PersistentData
-    Write-Host -ForegroundColor Cyan "Database has been updated."
+    if($null -eq $result) {
+        # If no matching models were found in the database, create the entry
+        Write-Host -ForegroundColor Yellow "No matching BIOS information found in database."
+        $PersistentData.CurrentBIOSVersions += New-PSObject @{ "Manufacturer" = $sysInfo.Manufacturer; 
+                                                                    "Model" = $sysInfo.Model; "BIOSVersion" = $sysInfo.BIOSVersion }
+        Save-PersistentData $PersistentData
+        Write-Host -ForegroundColor Cyan "Database has been updated."
 
-    $result = @{ "Successful" = $true; "Message" = "No associated BIOS info existed in database." }
+        $result = @{ "Successful" = $true; "Message" = "No associated BIOS info existed in database." }
+    }
 
     return @{ "Result"=$result; "TestObj"=$TestObj; }
 }
@@ -69,7 +71,7 @@ function Test-IPDT
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $result = $null
@@ -78,7 +80,7 @@ function Test-IPDT
 
     Write-Host -ForegroundColor White "Wait until the test completes, then indicate whether the test passed."
 
-    $process = Start-Process -FilePath "C:\Program Files\IPDT\IPDT.exe" -PassThru
+    $process = Start-Process -FilePath "C:\Program Files\Intel Corporation\Intel Processor Diagnostic Tool 64bit\Win-IPDT64.exe" -WorkingDirectory "C:\Program Files\Intel Corporation\Intel Processor Diagnostic Tool 64bit\" -PassThru
 
     $response = Get-KeypressResponse -Prompt "Did the suite of tests pass? (Y/N): " -Options "y","Y","n","N"
 
@@ -102,7 +104,7 @@ function Test-Cinebench
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $scoreValueObj = $TestObj.Results[0].Value
@@ -110,7 +112,7 @@ function Test-Cinebench
     Write-Host -ForegroundColor White "Click `"Run`", wait until the test completes, then enter the given score."
     Write-Host -ForegroundColor White "The expected point range for this machine is $($scoreValueObj.Min)-$($scoreValueObj.Max)."
 
-    $process = Start-Process -FilePath "C:\Program Files\Cinebench\Cinebench.exe" -PassThru
+    $process = Start-Process -FilePath "C:\Program Files\Cinebench R20\Cinebench.exe" -WorkingDirectory "C:\Program Files\Cinebench R20" -PassThru
 
     $scoreResponse = Get-DoubleResponse -Prompt "What score did Cinebench give?: "
 
@@ -155,7 +157,7 @@ function Test-FurMarkdGPU
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $scoreValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Score"
@@ -165,7 +167,7 @@ function Test-FurMarkdGPU
     Write-Host -ForegroundColor White "The expected point range for this machine is $($scoreValueObj.Min)-$($scoreValueObj.Max)."
     Write-Host -ForegroundColor White "The expected GPU core temperature range for this machine is $($tempValueObj.Min)-$($tempValueObj.Max)."
 
-    $process = Start-Process -FilePath "C:\Program Files\FurMark\FurMark.exe" -PassThru
+    $process = Start-Process -FilePath "C:\Program Files (x86)\Geeks3D\Benchmarks\FurMark\FurMark.exe" -WorkingDirectory "C:\Program Files (x86)\Geeks3D\Benchmarks\FurMark" -PassThru
 
     $scoreResponse = Get-DoubleResponse -Prompt "What score did FurMark give?: "
     $tempResponse = Get-DoubleResponse -Prompt "What average GPU core temperature did FurMark report?: "
@@ -226,7 +228,7 @@ function Test-FurMarkiGPU
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $scoreValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Score"
@@ -236,7 +238,7 @@ function Test-FurMarkiGPU
     Write-Host -ForegroundColor White "The expected point range for this machine is $($scoreValueObj.Min)-$($scoreValueObj.Max)."
     Write-Host -ForegroundColor White "The expected GPU core temperature range for this machine is $($tempValueObj.Min)-$($tempValueObj.Max)."
 
-    $process = Start-Process -FilePath "C:\Program Files\FurMark (iGPU)\FurMark.exe" -PassThru
+    $process = Start-Process -FilePath "C:\Program Files (x86)\Geeks3D\Benchmarks\FurMark - iGPU\FurMark - iGPU.exe" -WorkingDirectory "C:\Program Files (x86)\Geeks3D\Benchmarks\FurMark - iGPU" -PassThru
 
     $scoreResponse = Get-DoubleResponse -Prompt "What score did FurMark give?: "
     $tempResponse = Get-DoubleResponse -Prompt "What average Intel GPU core temperature did FurMark report?: "
@@ -297,7 +299,7 @@ function Test-Heaven
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $scoreValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Score"
@@ -312,10 +314,10 @@ function Test-Heaven
 
     if(Get-Process | Where-Object {$_.ProcessName -eq "HWiNFO64"} -eq $null) {
         # Start HWiNFO64 if it isn't already running
-        Start-Process -FilePath "C:\Program Files\HWiNFO\HWiNFO64.exe" | Out-Null
+        Start-Process -FilePath "C:\Program Files\HWiNFO64\HWiNFO64.exe" -WorkingDirectory "C:\Program Files\HWiNFO64" | Out-Null
     }
 
-    $process = Start-Process -FilePath "C:\Program Files\Heaven\Heaven.exe" -PassThru
+    $process = Start-Process -FilePath "C:\Program Files (x86)\Unigine\Heaven Benchmark 4.0\heaven.bat" -WorkingDirectory "C:\Program Files (x86)\Unigine\Heaven Benchmark 4.0" -PassThru
 
     $scoreResponse = Get-DoubleResponse -Prompt "What score did Heaven give?: "
     $gpuTempResponse = Get-DoubleResponse -Prompt "What average GPU core temperature did HWiNFO64 report?: "
@@ -391,7 +393,7 @@ function Test-Prime95
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $tempValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Average CPU Max Core Temperature"
@@ -403,9 +405,9 @@ function Test-Prime95
     $hwinfoProcess = Get-Process | Where-Object {$_.ProcessName -eq "HWiNFO64"}
     if($null -eq $hwinfoProcess) {
         # Start HWiNFO64 if it isn't already running
-        $hwinfoProcess = Start-Process -FilePath "C:\Program Files\HWiNFO\HWiNFO64.exe" -PassThru
+        $hwinfoProcess = Start-Process -FilePath "C:\Program Files\HWiNFO64\HWiNFO64.exe" -WorkingDirectory "C:\Program Files\HWiNFO64" -PassThru
     }
-    $prime95Process = Start-Process -FilePath "C:\Program Files\Prime95\Prime95.exe" -PassThru
+    $prime95Process = Start-Process -FilePath "C:\Program Files\Prime95\prime95.exe" -WorkingDirectory "C:\Program Files\Prime95" -PassThru
 
     $tempResponse = Get-DoubleResponse -Prompt "What average CPU max core temperature did HWiNFO64 report?: "
     
@@ -456,7 +458,7 @@ function Test-MemTest64
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
     
     $valueObj = $TestObj.Results[0].Value
@@ -465,7 +467,7 @@ function Test-MemTest64
     Write-Host -ForegroundColor White "This test is notoriously tricky. You may need to reboot a few times or boot into safe mode in order to get it to start."
     Write-Host -ForegroundColor White "If you cannot get the test to run, skip it and run the Windows Memory Diagnostic instead."
 
-    $process = Start-Process -FilePath "C:\Program Files\MemTest64\MemTest64.exe" -PassThru
+    $process = Start-Process -FilePath "C:\Program Files\MemTest64\MemTest64.exe" -WorkingDirectory "C:\Program Files\MemTest64" -PassThru
 
     $response = Get-KeypressResponse -Prompt "Did the test pass? (Y/N/(S)kip): " -Options 'y','Y','n','N','s','S'
     $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
@@ -506,7 +508,7 @@ function Test-WinMemDiag
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
     
     $valueObj = $TestObj.Results[0].Value
@@ -533,7 +535,7 @@ function Test-WinMemDiag
         Write-Host -ForegroundColor White "Wait until the test completes, then indicate whether the test passed."
         Write-Host -ForegroundColor White "This test indicates whether it passed via a notification in the notification center. It may take a few minutes to appear after rebooting."
 
-        Start-Process -FilePath "C:\Windows\System32\WindowsMemoryDiagnostic.exe"
+        Start-Process -FilePath "%windir%\system32\MdSched.exe" -WorkingDirectory "%windir%\system32" | Out-Null
     } elseif($response -eq 'y' -or $response -eq 'Y') {
         # If we're returning after rebooting
         $response = Get-KeypressResponse -Prompt "Did the test pass? (Y/N/(S)kip): " -Options 'y','Y','n','N','s','S'
@@ -568,7 +570,7 @@ function Test-BasicsUSB
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $cursorPositionBeforeTest = $host.UI.RawUI.CursorPosition
@@ -633,7 +635,7 @@ function Test-BasicsDisplay
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $testPassed = $true
@@ -699,7 +701,7 @@ function Test-BasicsHDMI
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $result = $null
@@ -726,7 +728,7 @@ function Test-BasicsSound
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $testPassed = $true
@@ -775,7 +777,7 @@ function Test-BasicsNetwork
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $testPassed = $true
@@ -826,7 +828,7 @@ function Test-BasicsKeyboard
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $testPassed = $true
@@ -866,7 +868,7 @@ function Test-BasicsCursor
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $testPassed = $true
@@ -915,7 +917,7 @@ function Test-BasicsCamera
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $result = $null
@@ -948,7 +950,7 @@ function Test-BasicsPhysical
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [System.Management.Automation.PSCustomObject]$TestObj
+            [Object]$TestObj
     )
 
     $result = $null

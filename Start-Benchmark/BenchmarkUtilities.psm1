@@ -36,10 +36,11 @@ function Get-KeypressResponse
         $optionsString = ""
         $firstOptionAdded = $false
         foreach($option in $Options) {
-            if($firstOptionAdded) {
-                $optionsString += ", $option"
-            } else {
+            if(!$firstOptionAdded) {
                 $optionsString += $option
+                $firstOptionAdded = $true
+            } else {
+                $optionsString += ", $option"
             }
         }
     }
@@ -49,6 +50,7 @@ function Get-KeypressResponse
             Write-Host -ForegroundColor White $Prompt -NoNewline
         }
         $response = $Host.UI.RawUI.ReadKey().Character
+        Write-Host
         if(!$Options -or $Options -contains $response) {
             return $response
         } else {
@@ -106,7 +108,7 @@ function Get-SystemInfo
     $serial = $WMIWin32_BIOS.SerialNumber
     $biosVersion = $WMIWin32_BIOS.SMBIOSBIOSVersion
     
-    return  -Property @{
+    return New-PSObject -Property @{
         "Model" = $model_name;
         "Manufacturer" = $mfr_name;
         "SerialNumber" = $serial;
@@ -118,7 +120,7 @@ function Test-SysInfoMatch
 {
     Param(
         [Parameter(Position=1)]
-            [System.Management.Automation.PSCustomObject]$SysInfo=(Get-SystemInfo),
+            [Object]$SysInfo=(Get-SystemInfo),
         [String]$Manufacturer,
         [String]$Model
     )
@@ -130,10 +132,17 @@ function Test-SysInfoMatch
 function Get-PersistentData
 {
     Param(
-        [String]$FilePath = "$DBDirectoryPath\persistentdata.json"
+        [String]$FilePath = "$PSScriptRoot\persistentdata.json"
     )
 
-    $result = Get-Content $FilePath | ConvertFrom-Json
+    $result = $null
+    try {
+        $result = Get-Content $FilePath -ErrorAction Stop | ConvertFrom-Json
+    } catch {
+        if($_.FullyQualifiedErrorId -eq "PathNotFound,Microsoft.PowerShell.Commands.GetContentCommand") {
+            $result = New-PSObject
+        }
+    }
 
     # Add the file path as part of the object
     Add-Member -InputObject $result -NotePropertyName "FilePath" -NotePropertyValue "$FilePath"
@@ -153,7 +162,7 @@ function Save-PersistentData
     }
 
     # Don't save the file path as part of the object
-    $PersistentData.PSObject.Properties.Remove("FilePath")
+    $PersistentData = $PersistentData.PSObject.Properties.Remove("FilePath")
 
     ConvertTo-Json $PersistentData | Out-File $FilePath
 }
@@ -162,7 +171,7 @@ function New-ResultData
 {
     Param(
         [String]$FilePath,
-        [System.Management.Automation.PSCustomObject]$SysInfo=(Get-SystemInfo)
+        [Object]$SysInfo=(Get-SystemInfo)
     )
     $date = Get-Date
     $dateString = Get-Date -Format "yyyyMMdd"
@@ -214,14 +223,15 @@ function Save-ResultData
     }
 
     # Don't save the file path as part of the object
-    $ResultData.PSObject.Properties.Remove("FilePath")
+    $ResultData = $ResultData.PSObject.Properties.Remove("FilePath")
 
-    ConvertTo-Json $PersistentData | Out-File $FilePath
+    ConvertTo-Json $ResultData | Out-File $FilePath
 }
 function Get-Tests
 {
     Param(
-        [String]$FilePath = "$DBDirectoryPath\tests.json"
+        [Parameter(Mandatory=$true)]
+            [String]$FilePath
     )
 
     $sysInfo = Get-SystemInfo
@@ -235,10 +245,10 @@ function Get-Tests
             foreach($value in $result.Values) {
                 if(Test-SysInfoMatch $sysInfo -Manufacturer $value.Manufacturer -Model $value.Model) {
                     # If we've found a matching result value
-                    $newResult = $result.Copy()
+                    $newResult = $result.PSObject.Copy()
                     $newResult.PSObject.Properties.Remove("Values")
 
-                    $valueObj = $value.Copy()
+                    $valueObj = $value.PSObject.Copy()
                     if($value.Manufacturer) {
                         $valueObj.PSObject.Properties.Remove("Manufacturer")
                     }
