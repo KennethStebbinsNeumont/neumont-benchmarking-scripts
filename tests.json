@@ -53,6 +53,16 @@
                         "Model": "Precision 5520",
                         "Min": 1450,
                         "Max": 1750
+                    },
+                    {
+                        "Model": "20ME*",
+                        "Min": 2250,
+                        "Max": 2550
+                    },
+                    {
+                        "Model": "20QU*",
+                        "Min": 2600,
+                        "Max": 2900
                     }
                 ]
             }
@@ -74,6 +84,16 @@
                         "Model": "Precision 5520",
                         "Min": 1200,
                         "Max": 1300
+                    },
+                    {
+                        "Model": "20ME*",
+                        "Min": 1900,
+                        "Max": 2100
+                    },
+                    {
+                        "Model": "20QU*",
+                        "Min": 2140,
+                        "Max": 2340
                     }
                 ]
             },
@@ -86,6 +106,16 @@
                 "Values": [
                     {
                         "Model": "Precision 5520",
+                        "Min": 75,
+                        "Max": 90
+                    },
+                    {
+                        "Model": "20ME*",
+                        "Min": 75,
+                        "Max": 90
+                    },
+                    {
+                        "Model": "20QU*",
                         "Min": 75,
                         "Max": 90
                     }
@@ -107,8 +137,18 @@
                 "Values": [
                     {
                         "Model": "Precision 5520",
-                        "Min": 625,
-                        "Max": 700
+                        "Min": 410,
+                        "Max": 540
+                    },
+                    {
+                        "Model": "20ME*",
+                        "Min": 410,
+                        "Max": 540
+                    },
+                    {
+                        "Model": "20QU*",
+                        "Min": 410,
+                        "Max": 540
                     }
                 ]
             },
@@ -121,6 +161,16 @@
                 "Values": [
                     {
                         "Model": "Precision 5520",
+                        "Min": 75,
+                        "Max": 90
+                    },
+                    {
+                        "Model": "20ME*",
+                        "Min": 75,
+                        "Max": 90
+                    },
+                    {
+                        "Model": "20QU*",
                         "Min": 75,
                         "Max": 90
                     }
@@ -142,8 +192,18 @@
                 "Values": [
                     {
                         "Model": "Precision 5520",
-                        "Min": 700,
+                        "Min": 775,
+                        "Max": 825
+                    },
+                    {
+                        "Model": "20ME*",
+                        "Min": 850,
                         "Max": 900
+                    },
+                    {
+                        "Model": "20QU*",
+                        "Min": 975,
+                        "Max": 1025
                     }
                 ]
             },
@@ -158,6 +218,16 @@
                         "Model": "Precision 5520",
                         "Min": 75,
                         "Max": 95
+                    },
+                    {
+                        "Model": "20ME*",
+                        "Min": 70,
+                        "Max": 80
+                    },
+                    {
+                        "Model": "20QU*",
+                        "Min": 70,
+                        "Max": 80
                     }
                 ]
             },
@@ -172,6 +242,16 @@
                         "Model": "Precision 5520",
                         "Min": 75,
                         "Max": 95
+                    },
+                    {
+                        "Model": "20ME*",
+                        "Min": 70,
+                        "Max": 80
+                    },
+                    {
+                        "Model": "20QU*",
+                        "Min": 70,
+                        "Max": 80
                     }
                 ]
             }
@@ -193,6 +273,16 @@
                         "Model": "Precision 5520",
                         "Min": 80,
                         "Max": 99
+                    },
+                    {
+                        "Model": "20ME*",
+                        "Min": 78,
+                        "Max": 92
+                    },
+                    {
+                        "Model": "20QU*",
+                        "Min": 78,
+                        "Max": 92
                     }
                 ]
             }
@@ -275,6 +365,205 @@
             {
                 "Name": "SD Card Reader Works",
                 "Description": "Whether data can be read through the SD card reader.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "Basics: Display Test",
+        "Description": "Observe the display while it's displaying different colors to verify that it is free of defects. On models with touchscreens, verify the touchscreen works, too.",
+        "CommandName": "BasicsDisplay",
+        "Results": [
+            {
+                "Name": "No LCD Defects Detected",
+                "Description": "No defects were seen in the display.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            },
+            {
+                "Name": "Touchscreen Works",
+                "Description": "Touchscreen reliably detects taps, drags, and multi-point gestures.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "20GR*",
+                        "Expected": true
+                    }
+                ]
+            },
+            {
+                "Name": "Touchscreen Works",
+                "Description": "Touchscreen reliably detects taps, drags, and multi-point gestures.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "Precision 5520",
+                        "Expected": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "Basics: HDMI Test",
+        "Description": "Connect the machine to an HDMI monitor and verify that an image is displayed.",
+        "CommandName": "BasicsHDMI",
+        "Results": [
+            {
+                "Name": "Image Was Displayed",
+                "Description": "Whether the machine displayed an image on the external HDMI monitor.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "Basics: Sound",
+        "Description": "Test the device's speakers and headphone jack, verifying that all channels sound balanced and do not have a rattle or sound distorted.",
+        "CommandName": "BasicsSound",
+        "Results": [
+            {
+                "Name": "Speakers Passed",
+                "Description": "Whether the speakers sound balanced and do not have a rattle or sound distorted.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            },
+            {
+                "Name": "Headphone Jack Passed",
+                "Description": "Whether the headphones connected to the headphone jack sound balanced.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "Basics: Network",
+        "Description": "Test the device's network connectivity.",
+        "CommandName": "BasicsNetwork",
+        "Results": [
+            {
+                "Name": "Wi-Fi Connection Works",
+                "Description": "Webpages can be loaded over Wi-Fi.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            },
+            {
+                "Name": "Wired Connection Works",
+                "Description": "Webpages can be loaded over a wired connection.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Manufacturer": "LENOVO",
+                        "Expected": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "Basics: Keyboard",
+        "Description": "Test the device's keyboard.",
+        "CommandName": "BasicsKeyboard",
+        "Results": [
+            {
+                "Name": "All Keys Work",
+                "Description": "All keys on the keyboard are registed in the OS.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "Basics: Cursor",
+        "Description": "Test the device's cursor input.",
+        "CommandName": "BasicsCursor",
+        "Results": [
+            {
+                "Name": "Trackpad Works",
+                "Description": "The trackpad can be used to move the cursor, left click, right click, and scroll.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            },
+            {
+                "Name": "TrackPoint Works",
+                "Description": "The TrackPoint can be used to move the cursor, left click, right click, and scroll.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Manufacturer": "LENOVO",
+                        "Expected": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "Basics: Camera",
+        "Description": "Test the device's camera.",
+        "CommandName": "BasicsCursor",
+        "Results": [
+            {
+                "Name": "Trackpad Works",
+                "Description": "The camera is detected by Windows and displays an image in the Camera app.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "Basics: Physical",
+        "Description": "Test the device's physical sturdiness by twisting it and pushing down on the keybaord.",
+        "CommandName": "BasicsCursor",
+        "Results": [
+            {
+                "Name": "No Crashes Occurred",
+                "Description": "The machine didn't freeze or show a black screen during or after the test.",
                 "Type": "Boolean",
                 "Values": [
                     {
