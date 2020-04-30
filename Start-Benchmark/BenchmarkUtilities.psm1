@@ -185,7 +185,7 @@ function New-ResultData
             "Model" = $SysInfo.Model;
             "SerialNumber" = $SysInfo.SerialNumber;
         };
-        "Tests" = @();
+        "Tests" = [System.Collections.ArrayList]@();
         "TestsComplete" = $false;
         "Passed" = $false;
     }
