@@ -346,7 +346,6 @@ function Test-Heaven
     }
 
     Start-Process -FilePath "C:\Program Files (x86)\Unigine\Heaven Benchmark 4.0\heaven.bat" -WorkingDirectory "C:\Program Files (x86)\Unigine\Heaven Benchmark 4.0"
-    $launcherProcess = Get-Process | Where-Object {$_.ProcessName -eq "browser_x86"}
 
 
     $scoreResponse = Get-DoubleResponse -Prompt "What score did Heaven give?: "
@@ -371,21 +370,6 @@ function Test-Heaven
     }
     Add-Member -InputObject $scoreValueObj -NotePropertyName Value -NotePropertyValue $scoreResponse
     
-    if($gpuTempResponse -lt $gpuTempValueObj.Max) {
-        if($gpuTempResponse -lt $gpuTempValueObj.Min) {
-            $comment = "Average GPU core temperature was lower than the expected minimum."
-            Write-Host -ForegroundColor Cyan $comment
-            Add-Member -InputObject $gpuTempValueObj -NotePropertyName Comment -NotePropertyValue $comment
-            $comments += $comment
-        }
-    } else {
-        $comment = "Average GPU core temperature was higher than the expected maximum."
-        Write-Host -ForegroundColor Red $comment
-        $comments += $comment
-        $testPassed = $false
-    }
-    Add-Member -InputObject $gpuTempValueObj -NotePropertyName Value -NotePropertyValue $gpuTempResponse
-    
     if($cpuTempResponse -lt $cpuTempValueObj.Max) {
         if($cpuTempResponse -lt $cpuTempValueObj.Min) {
             $comment = "Average CPU max core temperature was lower than the expected minimum."
@@ -400,7 +384,23 @@ function Test-Heaven
         $testPassed = $false
     }
     Add-Member -InputObject $cpuTempValueObj -NotePropertyName Value -NotePropertyValue $cpuTempResponse
+    
+    if($gpuTempResponse -lt $gpuTempValueObj.Max) {
+        if($gpuTempResponse -lt $gpuTempValueObj.Min) {
+            $comment = "Average GPU core temperature was lower than the expected minimum."
+            Write-Host -ForegroundColor Cyan $comment
+            Add-Member -InputObject $gpuTempValueObj -NotePropertyName Comment -NotePropertyValue $comment
+            $comments += $comment
+        }
+    } else {
+        $comment = "Average GPU core temperature was higher than the expected maximum."
+        Write-Host -ForegroundColor Red $comment
+        $comments += $comment
+        $testPassed = $false
+    }
+    Add-Member -InputObject $gpuTempValueObj -NotePropertyName Value -NotePropertyValue $gpuTempResponse
 
+    $launcherProcess = Get-Process | Where-Object {$_.ProcessName -eq "browser_x86"}
     $gameProcess = Get-Process | Where-Object {$_.ProcessName -eq "Heaven"}
 
     if(!$launcherProcess.HasExited -or !$gameProcess.HasExited) {
