@@ -342,10 +342,12 @@ function Test-Heaven
 
     if(Get-Process | Where-Object {$_.ProcessName -eq "HWiNFO64"} -eq $null) {
         # Start HWiNFO64 if it isn't already running
-        Start-Process -FilePath "C:\Program Files\HWiNFO64\HWiNFO64.exe" -WorkingDirectory "C:\Program Files\HWiNFO64" | Out-Null
+        Start-Process -FilePath "C:\Program Files\HWiNFO64\HWiNFO64.exe" -WorkingDirectory "C:\Program Files\HWiNFO64"
     }
 
-    $process = Start-Process -FilePath "C:\Program Files (x86)\Unigine\Heaven Benchmark 4.0\heaven.bat" -WorkingDirectory "C:\Program Files (x86)\Unigine\Heaven Benchmark 4.0" -PassThru
+    Start-Process -FilePath "C:\Program Files (x86)\Unigine\Heaven Benchmark 4.0\heaven.bat" -WorkingDirectory "C:\Program Files (x86)\Unigine\Heaven Benchmark 4.0"
+    $launcherProcess = Get-Process | Where-Object {$_.ProcessName -eq "browser_x86"}
+
 
     $scoreResponse = Get-DoubleResponse -Prompt "What score did Heaven give?: "
     $gpuTempResponse = Get-DoubleResponse -Prompt "What average GPU core temperature did HWiNFO64 report?: "
@@ -399,9 +401,16 @@ function Test-Heaven
     }
     Add-Member -InputObject $cpuTempValueObj -NotePropertyName Value -NotePropertyValue $cpuTempResponse
 
-    if(!$process.HasExited) {
+    $gameProcess = Get-Process | Where-Object {$_.ProcessName -eq "Heaven"}
+
+    if(!$launcherProcess.HasExited -or !$gameProcess.HasExited) {
         Write-Host -ForegroundColor Cyan "Please close Heaven to continue (Do NOT close HWiNFO64)..."
-        $process.WaitForExit()
+        if(!$launcherProcess.HasExited) {
+            $launcherProcess.WaitForExit()
+        }
+        if(!$gameProcess.HasExited) {
+            $gameProcess.WaitForExit()
+        }
     }
 
     $commentString = ""
