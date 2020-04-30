@@ -5,10 +5,17 @@
         [Parameter(Mandatory=$true)]
             [String]$DBDirectoryPath,
         [String]$ResultDataFilePath,
+        [String]$TestDefinitionsPath,
         [Switch]$RestartTest
     )
 
     $systemInfo = Get-SystemInfo
+    $dateString = Get-Date -Format "yyyyMMdd"
+    $timeString = Get-Date -Format "HHmmss"
+
+    if($null -eq $TestDefinitionsPath) {
+        $TestDefinitionsPath = "$DBDirectoryPath\tests.json"
+    }
 
     $resultData = $null
     # Determine result file path
@@ -22,7 +29,7 @@
 
         $matchedFiles = Get-ChildItem -LiteralPath $currentPath | Where-Object {$_.Name -match "$dateString-.*-$($systemInfo.SerialNumber)-results\.json"}
 
-        if($matchedFiles) {
+        if($null -ne $matchedFiles) {
             if($matchedFiles -is [System.Array]) {
                 # If we found multiple files
 
@@ -43,7 +50,8 @@
     }
 
     $startNewRun = $true
-    if(!$resultData.TestsComplete) {
+    $testsToSkip = [System.Collections.ArrayList]@()
+    if($null -ne $resultData -eq !$resultData.TestsComplete) {
         :testLoop foreach($test in $resultData.Tests) {
             foreach($result in $test.Results) {
                 $valueObject = $result.Value
@@ -61,24 +69,38 @@
                     break testLoop
                 }
             }
+            $testsToSkip += $test.Name
         }
     }
 
     if($startNewRun) {
-        $resultData = New-ResultData -FilePath $ResultDataFilePath -SysInfo $systemInfo
+        $resultData = New-ResultData -FilePath "$DBDirectoryPath\$dateString-$timeString-$($systemInfo.SerialNumber)-results.json" -SysInfo $systemInfo
+    }
+
+    $commonInformation = New-PSObject -Property @{
+        "SysInfo"=$systemInfo;
+        "PersistentData"=(Get-PersistentData -FilePath "$DBDirectoryPath\persistentdata.json");
     }
 
     $i = 1
-    foreach($test in Get-Tests -FilePath "$DBDirectoryPath\tests.json") {
+    foreach($test in Get-Tests -FilePath $TestDefinitionsPath) {
+        if(!$startNewRun -and $testsToSkip -contains $test.Name) {
+            # Skip this test if it was already done in a previous run
+            continue
+        }
+
         Write-Host -ForegroundColor Magenta "Running test #$i"
         Write-Host -ForegroundColor White $test.Name
         Write-Host -ForegroundColor Gray $test.Description
 
         $command = Get-Command -Verb "Test" -Noun $test.CommandName -Module "BenchmarkTests"
 
-        $result = &"$command" -TestObj $test
+        $result = &"$command" -TestObj $test -Common $commonInformation
+
+        $resultData.Tests += $test
 
         if(!$result.Result.Successful) {
+            $resultData.Passed = $false
             Write-Host -ForegroundColor Red "Test `"$($test.Name)`" failed: $($result.Result.Message)"
             if($test.StopOnFail) {
                 Write-Host -ForegroundColor Red "This test must pass before the others can continue. Exiting now..."
@@ -86,8 +108,13 @@
             }
         }
 
+        Save-ResultData -ResultData $resultData
+
         $i += 1
     }
+
+    $resultData.TestsComplete = $true
+    Save-ResultData -ResultData $resultData
 }
 
 Export-ModuleMember -Function "Start-Benchmark"

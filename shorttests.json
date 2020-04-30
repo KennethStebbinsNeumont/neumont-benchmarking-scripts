@@ -1,0 +1,21 @@
+[
+    {
+        "Name": "BIOS Version Check",
+        "Description": "Check the BIOS version of the machine and verify that it is up to date.",
+        "CommandName": "BIOSVersion",
+        "Results": [
+            {
+                "Name": "BIOS Up-to-date",
+                "Description": "Wether the currently installed BIOS version is the most recent version available.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            }
+        ],
+        "StopOnFail": true
+    }
+]

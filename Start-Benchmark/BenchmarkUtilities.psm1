@@ -138,10 +138,10 @@ function Get-PersistentData
     $result = $null
     try {
         $result = Get-Content $FilePath -ErrorAction Stop | ConvertFrom-Json
-    } catch {
-        if($_.FullyQualifiedErrorId -eq "PathNotFound,Microsoft.PowerShell.Commands.GetContentCommand") {
-            $result = New-PSObject
-        }
+    } catch {}
+
+    if($null -eq $result) {
+        $result = New-PSObject
     }
 
     # Add the file path as part of the object
@@ -162,32 +162,28 @@ function Save-PersistentData
     }
 
     # Don't save the file path as part of the object
-    $PersistentData = $PersistentData.PSObject.Properties.Remove("FilePath")
+    $ClonedPersistentData = $PersistentData.PSObject.Copy()
+    $ClonedPersistentData.PSObject.Properties.Remove("FilePath")
 
-    ConvertTo-Json $PersistentData | Out-File $FilePath
+    ConvertTo-Json $ClonedPersistentData -Depth 100 | Out-File $FilePath
 }
 
 function New-ResultData
 {
     Param(
-        [String]$FilePath,
+        [Parameter(Mandatory=$true)]
+            [String]$FilePath,
         [Object]$SysInfo=(Get-SystemInfo)
     )
     $date = Get-Date
-    $dateString = Get-Date -Format "yyyyMMdd"
-    $timeString = Get-Date -Format "HHmmss"
-
-    if(!$FilePath) {
-        $FilePath = "$DBDirectoryPath\$dateString-$timeString-$($SysInfo.SerialNumber)-results\.json"
-    }
 
     return New-PSObject -Property @{
         "FilePath" = $FilePath;
         "Date" = $date;
         "Device" = New-PSObject @{
-            "Manufacturer" = $sysInfo.Manufacturer;
-            "Model" = $sysInfo.Model;
-            "SerialNumber" = $sysInfo.SerialNumber;
+            "Manufacturer" = $SysInfo.Manufacturer;
+            "Model" = $SysInfo.Model;
+            "SerialNumber" = $SysInfo.SerialNumber;
         };
         "Tests" = @();
         "TestsComplete" = $false;
@@ -223,9 +219,10 @@ function Save-ResultData
     }
 
     # Don't save the file path as part of the object
-    $ResultData = $ResultData.PSObject.Properties.Remove("FilePath")
+    $ClonedResultData = $ResultData.PSObject.Copy()
+    $ClonedResultData.PSObject.Properties.Remove("FilePath")
 
-    ConvertTo-Json $ResultData | Out-File $FilePath
+    ConvertTo-Json $ClonedResultData -Depth 100 | Out-File $FilePath
 }
 function Get-Tests
 {

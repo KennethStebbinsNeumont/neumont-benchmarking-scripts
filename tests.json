@@ -352,12 +352,72 @@
                 ]
             },
             {
+                "Name": "Back Left USB-C Port Works",
+                "Description": "Whether data can be read through the back left USB-C port, nearest the charge port.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "20ME*",
+                        "Expected": true
+                    },
+                    {
+                        "Model": "20QU*",
+                        "Expected": true
+                    }
+                ]
+            },
+            {
+                "Name": "Front Left USB-C Port Works",
+                "Description": "Whether data can be read through the front left USB-C port, nearest the headphone jack.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "20ME*",
+                        "Expected": true
+                    },
+                    {
+                        "Model": "20QU*",
+                        "Expected": true
+                    }
+                ]
+            },
+            {
                 "Name": "Right USB-A Port Works",
                 "Description": "Whether data can be read through the right USB-A port.",
                 "Type": "Boolean",
                 "Values": [
                     {
                         "Model": "Precision 5520",
+                        "Expected": true
+                    }
+                ]
+            },
+            {
+                "Name": "Back Right USB-A Port Works",
+                "Description": "Whether data can be read through the back right USB-A port, nearest the Kensington lock port.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "20ME*",
+                        "Expected": true
+                    },
+                    {
+                        "Model": "20QU*",
+                        "Expected": true
+                    }
+                ]
+            },
+            {
+                "Name": "Front Right USB-A Port Works",
+                "Description": "Whether data can be read through the front right USB-A port, nearest the SD card reader.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "20ME*",
+                        "Expected": true
+                    },
+                    {
+                        "Model": "20QU*",
                         "Expected": true
                     }
                 ]

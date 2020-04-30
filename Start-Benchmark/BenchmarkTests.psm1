@@ -3,17 +3,31 @@ function Test-BIOSVersion
     Param(
         [Parameter(Mandatory=$true,Position=1)]
             [Object]$TestObj,
-        [Parameter(Position=2)]
-            [Object]$SysInfo=(Get-SystemInfo),
-        [Parameter(Position=3)]
-            [Object]$PersistentData=(Get-PersistentData)
+        [Object]$Common,
+        [Object]$SysInfo,
+        [Object]$PersistentData
     )
 
+    if($null -eq $SysInfo) {
+        if($null -eq $Common) {
+            $SysInfo = Get-SystemInfo
+        } else {
+            $SysInfo = $Common.SysInfo
+        }
+    }
+
+    if($null -eq $PersistentData) {
+        if($null -eq $Common) {
+            $PersistentData = Get-PersistentData
+        } else {
+            $PersistentData = $Common.PersistentData
+        }
+    }
+
     $result = $null
-
-    $valueObj = $TestObj.Results[0].Value
-
-    $PersistentData = Get-PersistentData
+    
+    $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "BIOS Up-to-date"
+    $valueObj = $resultObj.Value
 
     $biosVersion = $SysInfo.BiosVersion
 
@@ -71,12 +85,14 @@ function Test-IPDT
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
 
     $result = $null
     
-    $valueObj = $TestObj.Results[0].Value
+    $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "All Tests Passed"
+    $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Wait until the test completes, then indicate whether the test passed."
 
@@ -104,10 +120,12 @@ function Test-Cinebench
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
-
-    $scoreValueObj = $TestObj.Results[0].Value
+    
+    $scoreObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Score"
+    $scoreValueObj = $scoreObj.Value
 
     Write-Host -ForegroundColor White "Click `"Run`", wait until the test completes, then enter the given score."
     Write-Host -ForegroundColor White "The expected point range for this machine is $($scoreValueObj.Min)-$($scoreValueObj.Max)."
@@ -157,11 +175,14 @@ function Test-FurMarkdGPU
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
 
-    $scoreValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Score"
-    $tempValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Average GPU Core Temperature"
+    $scoreObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Score"
+    $scoreValueObj = $scoreObj.Value
+    $tempObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Average GPU Core Temperature"
+    $tempValueObj = $tempObj.Value
 
     Write-Host -ForegroundColor White "Click the `"1080p`" preset, wait until the test completes, then enter the given score and average GPU core temperature."
     Write-Host -ForegroundColor White "The expected point range for this machine is $($scoreValueObj.Min)-$($scoreValueObj.Max)."
@@ -228,11 +249,14 @@ function Test-FurMarkiGPU
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
 
-    $scoreValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Score"
-    $tempValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Average GPU Core Temperature"
+    $scoreObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Score"
+    $scoreValueObj = $scoreObj.Value
+    $tempObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Average GPU Core Temperature"
+    $tempValueObj = $tempObj.Value
 
     Write-Host -ForegroundColor White "Click the `"1080p`" preset, wait until the test completes, then enter the given score and average GPU core temperature."
     Write-Host -ForegroundColor White "The expected point range for this machine is $($scoreValueObj.Min)-$($scoreValueObj.Max)."
@@ -299,12 +323,16 @@ function Test-Heaven
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
 
-    $scoreValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Score"
-    $gpuTempValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Average GPU Core Temperature"
-    $cpuTempValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Average CPU Max Core Temperature"
+    $scoreObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Score"
+    $scoreValueObj = $scoreObj.Value
+    $gpuTempObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Average GPU Core Temperature"
+    $gpuTempValueObj = $gpuTempObj.Value
+    $cpuTempObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Average CPU Max Core Temperature"
+    $cpuTempValueObj = $cpuTempObj.Value
 
     Write-Host -ForegroundColor White "Open HWiNFO64 in sensors-only mode. Click `"Run`" in Heaven. Reset the counters in HWiNFO (click the clock icon)."
     Write-Host -ForegroundColor White "Click `"Benchmark`" in Heaven (or press F9), wait until the test completes, then enter the given score, average GPU core temperature, and average CPU max core temperature."
@@ -369,7 +397,7 @@ function Test-Heaven
         $comments += $comment
         $testPassed = $false
     }
-    Add-Member -InputObject $gpuTempValueObj -NotePropertyName Value -NotePropertyValue $gpuTempResponse
+    Add-Member -InputObject $cpuTempValueObj -NotePropertyName Value -NotePropertyValue $cpuTempResponse
 
     if(!$process.HasExited) {
         Write-Host -ForegroundColor Cyan "Please close Heaven to continue (Do NOT close HWiNFO64)..."
@@ -393,10 +421,12 @@ function Test-Prime95
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
 
-    $tempValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Average CPU Max Core Temperature"
+    $tempObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Average CPU Max Core Temperature"
+    $tempValueObj = $tempObj.Value
 
     Write-Host -ForegroundColor White "Open HWiNFO64 in sensors-only mode. Choose the `"Small FFTs`" preset in Prime95 and click `"OK`". Reset the counters in HWiNFO (click the clock icon)."
     Write-Host -ForegroundColor White "Wait for at least 15 minutes, then enter the average CPU max core temperature."
@@ -458,10 +488,12 @@ function Test-MemTest64
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
     
-    $valueObj = $TestObj.Results[0].Value
+    $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "No Errors Detected"
+    $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Wait until the test completes, then indicate whether the test passed."
     Write-Host -ForegroundColor White "This test is notoriously tricky. You may need to reboot a few times or boot into safe mode in order to get it to start."
@@ -508,10 +540,12 @@ function Test-WinMemDiag
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
     
-    $valueObj = $TestObj.Results[0].Value
+    $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "No Errors Detected"
+    $valueObj = $resultObj.Value
 
     $response = Get-KeypressResponse -Prompt "Did MemTest64 start properly? (Y/N): " -Options 'y','Y','n','N'
     if($response -eq 'y' -or $response -eq 'Y') {
@@ -570,7 +604,8 @@ function Test-BasicsUSB
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
 
     $cursorPositionBeforeTest = $host.UI.RawUI.CursorPosition
@@ -590,13 +625,13 @@ function Test-BasicsUSB
                     Write-Host -ForegroundColor Red "`rNo removable drive detected. $(5 - [math]::Floor($i / 4)) second(s) remaining." -NoNewline
                     Start-Sleep -Milliseconds 250
                 } else {
-                    Write-Host -ForegroundColor Green "`rRemovable drive $($removableDrive.Name) detected."
+                    Write-Host -ForegroundColor Green "`rRemovable drive $($removableDrive.Name) detected.                                "
                     break
                 }
             }
             
             if($null -eq $removableDrive) {
-                Write-Host -ForegroundColor Yellow "`rNo removable drive was detected."
+                Write-Host -ForegroundColor Yellow "`rNo removable drive was detected.                                     "
                 $response = Get-KeypressResponse -Prompt "Try this port again? (Y/N): " -Options 'y','Y','n','N'
     
                 if($response -eq 'n' -or $response -eq 'N') {
@@ -635,12 +670,14 @@ function Test-BasicsDisplay
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
 
     $testPassed = $true
     
-    $lcdValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "No LCD Defects Detected"
+    $lcdObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "No LCD Defects Detected"
+    $lcdValueObj = $lcdObj.Value
 
     Write-Host -ForegroundColor White "Test the display showing all white, black, red, green and blue."
     Write-Host -ForegroundColor White "Search for light spots, stuck pixels, and scratches in the top layer."
@@ -666,8 +703,9 @@ function Test-BasicsDisplay
         $process.WaitForExit()
     }
 
-    $touchValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Touchscreen Works"
-    if($null -ne $touchValueObj) {
+    $touchObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Touchscreen Works"
+    if($null -ne $touchObj) {
+        $touchValueObj = $touchObj.Value
         # If we should also test the touch display.
         Write-Host -ForegroundColor White "Touchscreen Test."
         $process = Start-Process "www.neumont.edu"
@@ -701,12 +739,14 @@ function Test-BasicsHDMI
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
 
     $result = $null
     
-    $valueObj = $TestObj.Results[0].Value
+    $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Image Was Displayed"
+    $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Connect the machine to an HDMI monitor and verify that an image from the laptop is displayed."
     Write-Host -ForegroundColor Yellow "Wait for a minimum of 30 seconds after connecting to the display before marking this test as failed."
@@ -728,12 +768,14 @@ function Test-BasicsSound
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
 
     $testPassed = $true
     
-    $valueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Speakers Passed"
+    $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Speakers Passed"
+    $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Play the windows test tone and listen for channel balance, speaker rattling, or sound distortion."
     Write-Host -ForegroundColor Yellow "Verify beforehand that `"Audio Enhancemens`" are off in the speakers sound device advanced settings."
@@ -751,8 +793,9 @@ function Test-BasicsSound
     if($commentResponse -ne "") {
         Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
     }
-
-    $valueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Headphone Jack Passed"
+    
+    $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Headphone Jack Passed"
+    $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Connect headphones to the headphone jack, then play the windows test tone and listen for channel balance."
 
@@ -777,12 +820,14 @@ function Test-BasicsNetwork
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
 
     $testPassed = $true
     
-    $valueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Wi-Fi Connection Works"
+    $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Wi-Fi Connection Works"
+    $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Connect to Wi-Fi and verify that a webpage can be loaded."
     
@@ -828,12 +873,14 @@ function Test-BasicsKeyboard
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
 
     $testPassed = $true
     
-    $valueObj = $TestObj.Results[0].Value
+    $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "All Keys Work"
+    $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Go to keyboardtester.com/tester.html and verify that every keyboard key registers in the OS."
 
@@ -868,12 +915,14 @@ function Test-BasicsCursor
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
 
     $testPassed = $true
     
-    $valueObj = $TestObj.Results[0].Value
+    $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Trackpad Works"
+    $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Use the trackpad to move the cursor, left click, right click, and scroll."
 
@@ -891,8 +940,9 @@ function Test-BasicsCursor
         Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
     }
 
-    $trackpointValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Wired Connection Works"
-    if($null -ne $trackpointValueObj) {
+    $trackpointObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Wired Connection Works"
+    if($null -ne $trackpointObj) {
+        $trackpointValueObj = $trackpointObj.Value
         # If we should also test the touch display.
         Write-Host -ForegroundColor White "Use the TrackPoint to move the cursor, left click, right click, and scroll."
         $response = Get-KeypressResponse -Prompt "Did the TrackPoint work normally? (Y/N): " -Options "y","Y","n","N"
@@ -917,12 +967,14 @@ function Test-BasicsCamera
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
 
     $result = $null
     
-    $valueObj = $TestObj.Results[0].Value
+    $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Camera Works"
+    $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Open the Camera application and verify that the camera is working normally."
    
@@ -950,12 +1002,14 @@ function Test-BasicsPhysical
 {
     Param(
         [Parameter(Mandatory=$true,Position=1)]
-            [Object]$TestObj
+            [Object]$TestObj,
+        [Object]$Common
     )
 
     $result = $null
-    
-    $valueObj = $TestObj.Results[0].Value
+
+    $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "No Crashes Occurred"
+    $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Push down on the machine's keyboard, then pick the machine up and twist the chassis from the corners."
 

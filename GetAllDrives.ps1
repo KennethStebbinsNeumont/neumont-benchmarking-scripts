@@ -1,1 +1,0 @@
-Get-PSDrive | ? { $_.Provider.Name -eq "FileSystem" }
