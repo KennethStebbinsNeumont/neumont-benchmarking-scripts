@@ -601,7 +601,7 @@
     {
         "Name": "Basics: Camera",
         "Description": "Test the device's camera.",
-        "CommandName": "BasicsCursor",
+        "CommandName": "BasicsCamera",
         "Results": [
             {
                 "Name": "Trackpad Works",
