@@ -25,9 +25,7 @@
         # If a file path was not given
         $dateString = Get-Date -Format "yyyyMMdd"
 
-        $currentPath = $DBDirectoryPath
-
-        $matchedFiles = Get-ChildItem -LiteralPath $currentPath | Where-Object {$_.Name -match "$dateString-.*-$($systemInfo.SerialNumber)-results\.json"}
+        $matchedFiles = Get-ChildItem -LiteralPath $DBDirectoryPath | Where-Object {$_.Name -match "$dateString-.*-$($systemInfo.SerialNumber)-results\.json"}
 
         if($null -ne $matchedFiles) {
             if($matchedFiles -is [System.Array]) {
@@ -49,27 +47,32 @@
         }
     }
 
+    $commonInformation = New-PSObject -Property @{
+        "SysInfo"=$systemInfo;
+        "PersistentData"=(Get-PersistentData -FilePath "$DBDirectoryPath\persistentdata.json");
+    }
+
+    $tests = Get-Tests -FilePath $TestDefinitionsPath
+
     $startNewRun = $true
     $testsToSkip = [System.Collections.ArrayList]@()
-    if($null -ne $resultData -eq !$resultData.TestsComplete) {
-        :testLoop foreach($test in $resultData.Tests) {
-            foreach($result in $test.Results) {
-                $valueObject = $result.Value
+    if($null -ne $resultData -and !$resultData.TestsComplete) {
+        foreach($test in $tests) {
+            $matchedTest = Where-Object -InputObject $resultData.Tests -Property "Name" -EQ -Value $test.Name
 
-                if(!$valueObject.Skipped -and !$valueObject.PSObject.Properties.Name -contains "Value") {
-                    # If this value hasn't been filled yet
-
-                    Write-Host -ForegroundColor Yellow "The last benchmarking run didn't finish."
-                    $response = Get-KeypressResponse -Prompt "Would you like to (c)ontinue, (r)estart, or (e)xit?: " -Options "c","r","e"
-                    if($response -eq 'c' -or $response -eq 'C') {
-                        $startNewRun = $false
-                    } elseif($response -eq 'e' -or $response -eq 'E') {
-                        exit 0
-                    }
-                    break testLoop
+            if($null -eq $matchedTest) {
+                # If this applicable test wasn't included in the last run
+                Write-Host -ForegroundColor Yellow "The last benchmarking run didn't finish."
+                $response = Get-KeypressResponse -Prompt "Would you like to (c)ontinue, (r)estart, or (e)xit?: " -Options "c","r","e"
+                if($response -eq 'c' -or $response -eq 'C') {
+                    $startNewRun = $false
+                } elseif($response -eq 'e' -or $response -eq 'E') {
+                    exit 0
                 }
+                break
+            } else {
+                $testsToSkip += $test.Name
             }
-            $testsToSkip += $test.Name
         }
     }
 
@@ -77,13 +80,8 @@
         $resultData = New-ResultData -FilePath "$DBDirectoryPath\$dateString-$timeString-$($systemInfo.SerialNumber)-results.json" -SysInfo $systemInfo
     }
 
-    $commonInformation = New-PSObject -Property @{
-        "SysInfo"=$systemInfo;
-        "PersistentData"=(Get-PersistentData -FilePath "$DBDirectoryPath\persistentdata.json");
-    }
-
     $i = 1
-    foreach($test in Get-Tests -FilePath $TestDefinitionsPath) {
+    foreach($test in $tests) {
         if(!$startNewRun -and $testsToSkip -contains $test.Name) {
             # Skip this test if it was already done in a previous run
             continue
