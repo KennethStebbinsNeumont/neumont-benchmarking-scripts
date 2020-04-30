@@ -56,13 +56,15 @@
 
     $startNewRun = $true
     $testsToSkip = [System.Collections.ArrayList]@()
+    $lastRunTest = ""
     if($null -ne $resultData -and !$resultData.TestsComplete) {
         foreach($test in $tests) {
-            $matchedTest = Where-Object -InputObject $resultData.Tests -Property "Name" -EQ -Value $test.Name
+            $matchedTest = Where-Object -InputObject $resultData.Tests -FilterScript {$_.Name -eq $test.Name}
 
             if($null -eq $matchedTest) {
                 # If this applicable test wasn't included in the last run
                 Write-Host -ForegroundColor Yellow "The last benchmarking run didn't finish."
+                Write-Host -ForegroundColor Yellow "Last run test: $lastRunTest"
                 $response = Get-KeypressResponse -Prompt "Would you like to (c)ontinue, (r)estart, or (e)xit?: " -Options "c","r","e"
                 if($response -eq 'c' -or $response -eq 'C') {
                     $startNewRun = $false
@@ -72,6 +74,7 @@
                 break
             } else {
                 $testsToSkip += $test.Name
+                $lastRunTest = $test.Name
             }
         }
     }
@@ -80,8 +83,10 @@
         $resultData = New-ResultData -FilePath "$DBDirectoryPath\$dateString-$timeString-$($systemInfo.SerialNumber)-results.json" -SysInfo $systemInfo
     }
 
-    $i = 1
+    $i = 0
     foreach($test in $tests) {
+        $i += 1
+
         if(!$startNewRun -and $testsToSkip -contains $test.Name) {
             # Skip this test if it was already done in a previous run
             continue
@@ -107,8 +112,6 @@
         }
 
         Save-ResultData -ResultData $resultData
-
-        $i += 1
     }
 
     $resultData.TestsComplete = $true
