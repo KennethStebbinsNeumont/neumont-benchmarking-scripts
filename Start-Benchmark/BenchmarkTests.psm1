@@ -537,7 +537,7 @@ function Test-MemTest64
     }
 
     if($testSkipped) {
-        $result = @{ "Successful" = $false; "Message" = "Test skipped" }
+        $result = @{ "Successful" = $false; "Skipped" = $true; "Message" = "Test skipped" }
     } else {
         $result = @{ "Successful" = $testPassed }
     }
@@ -562,7 +562,7 @@ function Test-WinMemDiag
         Write-Host -ForegroundColor White "Skipping this test..."
         Add-Member -InputObject $valueObj -NotePropertyName Skipped -NotePropertyValue $true
         Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue "Test skipped because MemTest64 was already run."
-        $result = @{ "Successful" = $false; "Message" = "Test skipped because MemTest64 was already run." }
+        $result = @{ "Successful" = $false; "Skipped" = $true; "Message" = "Test skipped because MemTest64 was already run." }
 
         return @{ "Result"=$result; "TestObj"=$TestObj; }
     }
@@ -614,7 +614,8 @@ function Test-BasicsUSB
     Param(
         [Parameter(Mandatory=$true,Position=1)]
             [Object]$TestObj,
-        [Object]$Common
+        [Object]$Common,
+        [Int]$FailDelaySeconds=10
     )
 
     $cursorPositionBeforeTest = $host.UI.RawUI.CursorPosition
@@ -627,11 +628,11 @@ function Test-BasicsUSB
         $removableDrive = $null
         $continue = $true
         while($continue) {
-            foreach($i in (0..15)) {
-                # Wait for 5 seconds for the drive to appear
+            foreach($i in (0..($FailDelaySeconds * 4))) {
+                # Wait for 10 seconds for the drive to appear
                 $removableDrive = Get-PSDrive | Where-Object { $_.Provider.Name -eq "FileSystem" -and $_.Root -notmatch $env:SystemDrive }
                 if($null -eq $removableDrive) {
-                    Write-Host -ForegroundColor Red "`rNo removable drive detected. $(5 - [math]::Floor($i / 4)) second(s) remaining." -NoNewline
+                    Write-Host -ForegroundColor Red "`rNo removable drive detected. $($FailDelaySeconds - [math]::Floor($i / 4)) second(s) remaining." -NoNewline
                     Start-Sleep -Milliseconds 250
                 } else {
                     Write-Host -ForegroundColor Green "`rRemovable drive $($removableDrive.Name) detected.                                "
@@ -651,21 +652,17 @@ function Test-BasicsUSB
                     $testPassed = $false
                 }
             } else {
-                $response = Get-KeypressResponse -Prompt "Can you read/write from/to the drive? (Y/N): " -Options 'y','Y','n','N'
+                $response = Get-KeypressResponse -Prompt "Can you read/write from/to the drive? (Y/N/(R)etry): " -Options 'y','Y','n','N','r','R'
 
                 if($response -eq 'y' -or $response -eq 'Y') {
                     Add-Member -InputObject $result.Value -NotePropertyName Value -NotePropertyValue $true
                     $continue = $false
-                } else {
-                    $response = Get-KeypressResponse -Prompt "Try this port again? (Y/N): " -Options 'y','Y','n','N'
-        
-                    if($response -eq 'n' -or $response -eq 'N') {
-                        Write-Host -ForegroundColor Yellow "Marking this port as failed."
-                        Add-Member -InputObject $result.Value -NotePropertyName Value -NotePropertyValue $false
-                        Add-Member -InputObject $result.Value -NotePropertyName Comment -NotePropertyValue "This port could not be written to or read from."
-                        $continue = $false
-                        $testPassed = $false
-                    }
+                } elseif($response -eq 'n' -or $response -eq 'N') {
+                    Write-Host -ForegroundColor Yellow "Marking this port as failed."
+                    Add-Member -InputObject $result.Value -NotePropertyName Value -NotePropertyValue $false
+                    Add-Member -InputObject $result.Value -NotePropertyName Comment -NotePropertyValue "This port could not be written to or read from."
+                    $continue = $false
+                    $testPassed = $false
                 }
             }
         }
@@ -691,7 +688,7 @@ function Test-BasicsDisplay
     Write-Host -ForegroundColor White "Test the display showing all white, black, red, green and blue."
     Write-Host -ForegroundColor White "Search for light spots, stuck pixels, and scratches in the top layer."
 
-    $process = Start-Process -FilePath "C:\Program Files\MonitorTest\MonitorTest.exe" -PassThru
+    $process = Start-Process -FilePath "C:\Program Files\MonitorTest\monitorTest.exe" -PassThru
 
     $response = Get-KeypressResponse -Prompt "Did the display pass? (Y/N): " -Options "y","Y","n","N"
     $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
@@ -841,7 +838,9 @@ function Test-BasicsNetwork
     Write-Host -ForegroundColor White "Connect to Wi-Fi and verify that a webpage can be loaded."
     
     netsh wlan connect name=Neumont
-    $process = Start-Process "www.msn.com" -PassThru
+    Write-Host -ForegroundColor White "Connecting to Neumont Wi-Fi..."
+    Start-Sleep -Seconds 3
+    $process = Start-Process -FilePath "www.msn.com"
 
     $response = Get-KeypressResponse -Prompt "Did the webpage load? (Y/N): " -Options "y","Y","n","N"
 
@@ -852,12 +851,15 @@ function Test-BasicsNetwork
         $testPassed = $false
     }
     netsh wlan disconnect
+    Write-Host -ForegroundColor White "Disconnecting from Neumont Wi-Fi..."
+    Start-Sleep -Seconds 2
 
     $wiredValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Wired Connection Works"
     if($null -ne $wiredValueObj) {
         # If we should also test the touch display.
         Write-Host -ForegroundColor White "Connect the wired network adapter and verify that a webpage can be loaded."
-        $process = Start-Process "www.yahoo.com"
+        $response = Get-KeypressResponse -Prompt "Is the network adapter connected? (C)ontinue?: " -Options "c","C"
+        $process = Start-Process -FilePath "www.yahoo.com"
         $response = Get-KeypressResponse -Prompt "Did the webpage load? (Y/N): " -Options "y","Y","n","N"
 
         if($response -eq 'y' -or $response -eq 'Y') {
@@ -868,11 +870,6 @@ function Test-BasicsNetwork
         }
 
         Write-Host -ForegroundColor Cyan "Please disconnect the wired network adapter."
-    }
-
-    if(!$process.HasExited) {
-        Write-Host -ForegroundColor Cyan "Please close the web browser to continue..."
-        $process.WaitForExit()
     }
 
     return @{ "Result"=@{"Successful"=$testPassed}; "TestObj"=$TestObj; }
@@ -894,7 +891,12 @@ function Test-BasicsKeyboard
     Write-Host -ForegroundColor White "Go to keyboardtester.com/tester.html and verify that every keyboard key registers in the OS."
 
     netsh wlan connect name=Neumont
-    $process = Start-Process "www.keyboardtester.com/tester.html" -PassThru
+    Write-Host -ForegroundColor White "Connecting to Neumont Wi-Fi..."
+    Start-Sleep -Seconds 3
+    $process = Start-Process -FilePath "www.keyboardtester.com/tester.html"
+    # Wait a bit for the page to load, then disconnect from Wi-Fi
+    Start-Sleep -Seconds 3
+    netsh wlan disconnect
 
     $response = Get-KeypressResponse -Prompt "Did all the keys register? (Y/N): " -Options "y","Y","n","N"
     $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
@@ -908,13 +910,6 @@ function Test-BasicsKeyboard
     
     if($commentResponse -ne "") {
         Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
-    }
-
-    netsh wlan disconnect
-
-    if(!$process.HasExited) {
-        Write-Host -ForegroundColor Cyan "Please close the web browser to continue..."
-        $process.WaitForExit()
     }
 
     return @{ "Result"=@{"Successful" = $testPassed}; "TestObj"=$TestObj; }
@@ -935,7 +930,7 @@ function Test-BasicsCursor
 
     Write-Host -ForegroundColor White "Use the trackpad to move the cursor, left click, right click, and scroll."
 
-    $response = Get-KeypressResponse -Prompt "Did all the trackpad work normally? (Y/N): " -Options "y","Y","n","N"
+    $response = Get-KeypressResponse -Prompt "Did the trackpad work normally? (Y/N): " -Options "y","Y","n","N"
     $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
 
     if($response -eq 'y' -or $response -eq 'Y') {
@@ -949,7 +944,7 @@ function Test-BasicsCursor
         Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
     }
 
-    $trackpointObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Wired Connection Works"
+    $trackpointObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "TrackPoint Works"
     if($null -ne $trackpointObj) {
         $trackpointValueObj = $trackpointObj.Value
         # If we should also test the touch display.

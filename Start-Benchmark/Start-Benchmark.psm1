@@ -102,7 +102,7 @@
 
         $resultData.Tests += $test
 
-        if(!$result.Result.Successful) {
+        if(!$result.Result.Successful -and !$result.Result.Skipped) {
             $resultData.Passed = $false
             Write-Host -ForegroundColor Red "Test `"$($test.Name)`" failed: $($result.Result.Message)"
             if($test.StopOnFail) {
