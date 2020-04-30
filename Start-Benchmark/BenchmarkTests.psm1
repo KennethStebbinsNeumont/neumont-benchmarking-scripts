@@ -527,7 +527,7 @@ function Test-MemTest64
         $testSkipped = $true
     }
     
-    if($commentResponse -ne "") {
+    if($null -ne $commentResponse -and "" -ne $commentResponse) {
         Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
     }
 
@@ -595,7 +595,7 @@ function Test-WinMemDiag
             $testSkipped = $true
         }
     
-        if($commentResponse -ne "") {
+        if($null -ne $commentResponse -and "" -ne $commentResponse) {
             Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
         }
     }
@@ -700,7 +700,7 @@ function Test-BasicsDisplay
         $testPassed = $false
     }
     
-    if($commentResponse -ne "") {
+    if($null -ne $commentResponse -and "" -ne $commentResponse) {
         Add-Member -InputObject $lcdValueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
     }
 
@@ -733,7 +733,7 @@ function Test-BasicsDisplay
             $testPassed = $false
         }
         
-        if($commentResponse -ne "") {
+        if($null -ne $commentResponse -and "" -ne $commentResponse) {
             Add-Member -InputObject $touchValueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
         }
     }
@@ -796,7 +796,7 @@ function Test-BasicsSound
         $testPassed = $false
     }
     
-    if($commentResponse -ne "") {
+    if($null -ne $commentResponse -and "" -ne $commentResponse) {
         Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
     }
     
@@ -815,7 +815,7 @@ function Test-BasicsSound
         $testPassed = $false
     }
     
-    if($commentResponse -ne "") {
+    if($null -ne $commentResponse -and "" -ne $commentResponse) {
         Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
     }
 
@@ -908,7 +908,7 @@ function Test-BasicsKeyboard
         $testPassed = $false
     }
     
-    if($commentResponse -ne "") {
+    if($null -ne $commentResponse -and "" -ne $commentResponse) {
         Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
     }
 
@@ -940,7 +940,7 @@ function Test-BasicsCursor
         $testPassed = $false
     }
     
-    if($commentResponse -ne "") {
+    if($null -ne $commentResponse -and "" -ne $commentResponse) {
         Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
     }
 
@@ -959,7 +959,7 @@ function Test-BasicsCursor
             $testPassed = $false
         }
     
-        if($commentResponse -ne "") {
+        if($null -ne $commentResponse -and "" -ne $commentResponse) {
             Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
         }
     }
@@ -995,7 +995,7 @@ function Test-BasicsCamera
         $result = @{ "Successful" = $false; }
     }
     
-    if($commentResponse -ne "") {
+    if($null -ne $commentResponse -and "" -ne $commentResponse) {
         Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
     }
 
@@ -1028,7 +1028,7 @@ function Test-BasicsPhysical
         $result = @{ "Successful" = $false;}
     }
     
-    if($commentResponse -ne "") {
+    if($null -ne $commentResponse -and "" -ne $commentResponse) {
         Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
     }
 
