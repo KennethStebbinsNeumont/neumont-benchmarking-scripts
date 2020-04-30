@@ -619,7 +619,7 @@
     {
         "Name": "Basics: Physical",
         "Description": "Test the device's physical sturdiness by twisting it and pushing down on the keybaord.",
-        "CommandName": "BasicsCursor",
+        "CommandName": "BasicsPhysical",
         "Results": [
             {
                 "Name": "No Crashes Occurred",
