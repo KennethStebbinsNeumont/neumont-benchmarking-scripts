@@ -106,7 +106,7 @@ function Get-SystemInfo
     $serial = $WMIWin32_BIOS.SerialNumber
     $biosVersion = $WMIWin32_BIOS.SMBIOSBIOSVersion
     
-    return  -Property @{
+    return New-PSObject -Property @{
         "Model" = $model_name;
         "Manufacturer" = $mfr_name;
         "SerialNumber" = $serial;
@@ -175,7 +175,7 @@ function New-ResultData
     return New-PSObject -Property @{
         "FilePath" = $FilePath;
         "Date" = $date;
-        "Device" = New-PSObject @{
+        "Device" = New-PSObject -Property @{
             "Manufacturer" = $sysInfo.Manufacturer;
             "Model" = $sysInfo.Model;
             "SerialNumber" = $sysInfo.SerialNumber;
