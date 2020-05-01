@@ -116,6 +116,14 @@
 
     $resultData.TestsComplete = $true
     Save-ResultData -ResultData $resultData
+
+    if($resultData.Passed) {
+        Write-Host -ForegroundColor Green "All tests passed."
+    } else {
+        Write-Host -ForegroundColor Red "One or more tests failed."
+    }
+
+    Write-Host -ForegroundColor White "The transcript of this test has been saved to $($resultData.FilePath)"
 }
 
 Export-ModuleMember -Function "Start-Benchmark"
