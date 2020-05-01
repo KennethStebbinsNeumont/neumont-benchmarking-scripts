@@ -688,14 +688,14 @@ function Test-BasicsDisplay
     Write-Host -ForegroundColor White "Test the display showing all white, black, red, green and blue."
     Write-Host -ForegroundColor White "Search for light spots, stuck pixels, and scratches in the top layer."
 
-    $process = Start-Process -FilePath "C:\Program Files\MonitorTest\monitorTest.exe" -PassThru
+    $process = Start-Process -FilePath "C:\Program Files (x86)\MonitorTest\monitorTest.exe" -PassThru
 
     $response = Get-KeypressResponse -Prompt "Did the display pass? (Y/N): " -Options "y","Y","n","N"
     $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
 
     if($response -eq 'y' -or $response -eq 'Y') {
         Add-Member -InputObject $lcdValueObj -NotePropertyName Value -NotePropertyValue $true
-    } else {
+    } else { 
         Add-Member -InputObject $lcdValueObj -NotePropertyName Value -NotePropertyValue $false
         $testPassed = $false
     }
