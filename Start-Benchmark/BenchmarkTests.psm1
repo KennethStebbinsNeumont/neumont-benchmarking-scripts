@@ -714,12 +714,8 @@ function Test-BasicsDisplay
         $touchValueObj = $touchObj.Value
         # If we should also test the touch display.
         Write-Host -ForegroundColor White "Touchscreen Test."
-        $process = Start-Process "www.neumont.edu"
-        Write-Host -ForegroundColor White "Go to the web page and test that you can pinch zoom on it."
-        if(!$process.HasExited) {
-            Write-Host -ForegroundColor Cyan "Please close the browser to continue..."
-            $process.WaitForExit()
-        }
+        Start-Process "www.neumont.edu"
+        Write-Host -ForegroundColor White "Go to the web browser and test that you can pinch zoom on it."
         Write-Host -ForegroundColor White "On the desktop, test dragging an icon around to all four corners of the display, then back to the center."
         Write-Host -ForegroundColor White "On the desktop, tap with 5 fingers and verify that all 5 taps appear."
 
