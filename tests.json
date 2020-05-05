@@ -63,6 +63,11 @@
                         "Model": "20QU*",
                         "Min": 2600,
                         "Max": 2900
+                    },
+                    {
+                        "Model": "20GR*",
+                        "Min": 725,
+                        "Max": 825
                     }
                 ]
             }
@@ -94,6 +99,11 @@
                         "Model": "20QU*",
                         "Min": 2140,
                         "Max": 2340
+                    },
+                    {
+                        "Model": "20GR*",
+                        "Min": 330,
+                        "Max": 430
                     }
                 ]
             },
@@ -117,6 +127,11 @@
                     {
                         "Model": "20QU*",
                         "Min": 75,
+                        "Max": 90
+                    },
+                    {
+                        "Model": "20GR*",
+                        "Min": 60,
                         "Max": 90
                     }
                 ]
@@ -149,6 +164,11 @@
                         "Model": "20QU*",
                         "Min": 410,
                         "Max": 540
+                    },
+                    {
+                        "Model": "20GR*",
+                        "Min": 225,
+                        "Max": 275
                     }
                 ]
             },
@@ -172,6 +192,11 @@
                     {
                         "Model": "20QU*",
                         "Min": 75,
+                        "Max": 90
+                    },
+                    {
+                        "Model": "20GR*",
+                        "Min": 50,
                         "Max": 90
                     }
                 ]
@@ -204,6 +229,11 @@
                         "Model": "20QU*",
                         "Min": 975,
                         "Max": 1025
+                    },
+                    {
+                        "Model": "20GR*",
+                        "Min": 75,
+                        "Max": 90
                     }
                 ]
             },
@@ -283,6 +313,11 @@
                         "Model": "20QU*",
                         "Min": 78,
                         "Max": 92
+                    },
+                    {
+                        "Model": "20GR*",
+                        "Min": 75,
+                        "Max": 90
                     }
                 ]
             }
@@ -336,6 +371,10 @@
                 "Values": [
                     {
                         "Model": "Precision 5520",
+                        "Expected": true
+                    },
+                    {
+                        "Model": "20GR*",
                         "Expected": true
                     }
                 ]
@@ -404,6 +443,10 @@
                     {
                         "Model": "20QU*",
                         "Expected": true
+                    },
+                    {
+                        "Model": "20GR*",
+                        "Expected": true
                     }
                 ]
             },
@@ -418,6 +461,10 @@
                     },
                     {
                         "Model": "20QU*",
+                        "Expected": true
+                    },
+                    {
+                        "Model": "20GR*",
                         "Expected": true
                     }
                 ]
@@ -459,14 +506,7 @@
                     {
                         "Model": "20GR*",
                         "Expected": true
-                    }
-                ]
-            },
-            {
-                "Name": "Touchscreen Works",
-                "Description": "Touchscreen reliably detects taps, drags, and multi-point gestures.",
-                "Type": "Boolean",
-                "Values": [
+                    },
                     {
                         "Model": "Precision 5520",
                         "Expected": true
