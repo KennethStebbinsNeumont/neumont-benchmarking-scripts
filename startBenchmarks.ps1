@@ -1,9 +1,12 @@
 Remove-Module Start-Benchmark -ErrorAction SilentlyContinue
 Remove-Module Benchmark* -ErrorAction SilentlyContinue
 
-Import-Module "$PSScriptRoot\Start-Benchmark\Start-Benchmark.psd1"
+Import-Module "$HOME\Documents\Scripts\Start-Benchmark\Start-Benchmark.psd1"
 
-Start-Benchmark -DBDirectoryPath "$PSScriptRoot" -TestDefinitionsPath "$PSScriptRoot\tests.json"
+Start-Benchmark -DBDirectoryPath "$HOME\Documents\Scripts" -TestDefinitionsPath "$HOME\Documents\Scripts\tests.json"
+
+Write-Host -ForegroundColor White "Press ENTER to exit..."
+Read-Host | Out-Null
 
 Remove-Module Start-Benchmark
 Remove-Module Benchmark* -ErrorAction SilentlyContinue
