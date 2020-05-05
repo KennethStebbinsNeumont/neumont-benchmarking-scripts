@@ -23,9 +23,7 @@
         $resultData = Get-ResultData -FilePath $ResultDataFilePath
     } else {
         # If a file path was not given
-        $dateString = Get-Date -Format "yyyyMMdd"
-
-        $matchedFiles = Get-ChildItem -LiteralPath $DBDirectoryPath | Where-Object {$_.Name -match "$dateString-.*-$($systemInfo.SerialNumber)-results\.json"}
+        $matchedFiles = Get-ChildItem -LiteralPath $DBDirectoryPath | Where-Object {$_.Name -match "\d{8}-\d{6}-$($systemInfo.SerialNumber)-results\.json"}
 
         if($null -ne $matchedFiles) {
             if($matchedFiles -is [System.Array]) {
