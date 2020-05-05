@@ -81,6 +81,8 @@
         $resultData = New-ResultData -FilePath "$DBDirectoryPath\$dateString-$timeString-$($systemInfo.SerialNumber)-results.json" -SysInfo $systemInfo
     }
 
+    Write-Host -ForegroundColor Cyan "The transcript of this run is being saved to $($resultData.FilePath)"
+
     $i = 0
     foreach($test in $tests) {
         $i += 1
