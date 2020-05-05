@@ -14,6 +14,11 @@
             "Manufacturer": "DELL",
             "Model": "Precision 5520",
             "BIOSVersion": "1.18.0"
+        },
+        {
+            "Manufacturer": "LENOVO",
+            "Model": "20GR*",
+            "BIOSVersion": "R05ET81W (1.59)"
         }
     ]
 }
