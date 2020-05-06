@@ -984,7 +984,7 @@ function Test-BasicsCamera
     netsh wlan connect name=Neumont
     Write-Host -ForegroundColor White "Connecting to Neumont Wi-Fi..."
     Start-Sleep -Seconds 3
-    Start-Process -FilePath "www.keyboardtester.com/tester.html"
+    Start-Process -FilePath "https://webcamtests.com/"
     # Wait a bit for the page to load, then disconnect from Wi-Fi
     Write-Host -ForegroundColor White "Disconnecting from Neumont Wi-Fi..."
     Start-Sleep -Seconds 3
