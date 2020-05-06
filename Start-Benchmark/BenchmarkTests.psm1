@@ -511,7 +511,7 @@ function Test-MemTest64
     $process = Start-Process -FilePath "C:\Program Files\MemTest64\MemTest64.exe" -WorkingDirectory "C:\Program Files\MemTest64" -PassThru
 
     $response = Get-KeypressResponse -Prompt "Did the test pass? (Y/N/(S)kip): " -Options 'y','Y','n','N','s','S'
-    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
 
     $testPassed = $false
     $testSkipped = $false
@@ -582,7 +582,7 @@ function Test-WinMemDiag
     } elseif($response -eq 'y' -or $response -eq 'Y') {
         # If we're returning after rebooting
         $response = Get-KeypressResponse -Prompt "Did the test pass? (Y/N/(S)kip): " -Options 'y','Y','n','N','s','S'
-        $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+        $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
 
         if($response -eq 'y' -or $response -eq 'Y') {
             Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
@@ -691,7 +691,7 @@ function Test-BasicsDisplay
     $process = Start-Process -FilePath "C:\Program Files (x86)\MonitorTest\monitorTest.exe" -PassThru
 
     $response = Get-KeypressResponse -Prompt "Did the display pass? (Y/N): " -Options "y","Y","n","N"
-    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
 
     if($response -eq 'y' -or $response -eq 'Y') {
         Add-Member -InputObject $lcdValueObj -NotePropertyName Value -NotePropertyValue $true
@@ -720,7 +720,7 @@ function Test-BasicsDisplay
         Write-Host -ForegroundColor White "On the desktop, tap with 5 fingers and verify that all 5 taps appear."
 
         $response = Get-KeypressResponse -Prompt "Did the touch tests pass? (Y/N): " -Options "y","Y","n","N"
-        $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+        $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
 
         if($response -eq 'y' -or $response -eq 'Y') {
             Add-Member -InputObject $touchValueObj -NotePropertyName Value -NotePropertyValue $true
@@ -783,7 +783,7 @@ function Test-BasicsSound
     Write-Host -ForegroundColor Yellow "Verify beforehand that `"Audio Enhancemens`" are off in the speakers sound device advanced settings."
 
     $response = Get-KeypressResponse -Prompt "Do the speakers sound balanced and free from rattling and distortion? (Y/N): " -Options "y","Y","n","N"
-    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
 
     if($response -eq 'y' -or $response -eq 'Y') {
         Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
@@ -801,8 +801,8 @@ function Test-BasicsSound
 
     Write-Host -ForegroundColor White "Connect headphones to the headphone jack, then play the windows test tone and listen for channel balance."
 
-    $response = Get-KeypressResponse -Prompt "Do the sound balanced? (Y/N): " -Options "y","Y","n","N"
-    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+    $response = Get-KeypressResponse -Prompt "Do the headphones sound balanced? (Y/N): " -Options "y","Y","n","N"
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
 
     if($response -eq 'y' -or $response -eq 'Y') {
         Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
@@ -895,7 +895,7 @@ function Test-BasicsKeyboard
     netsh wlan disconnect
 
     $response = Get-KeypressResponse -Prompt "Did all the keys register? (Y/N): " -Options "y","Y","n","N"
-    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
 
     if($response -eq 'y' -or $response -eq 'Y') {
         Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
@@ -927,7 +927,7 @@ function Test-BasicsCursor
     Write-Host -ForegroundColor White "Use the trackpad to move the cursor, left click, right click, and scroll."
 
     $response = Get-KeypressResponse -Prompt "Did the trackpad work normally? (Y/N): " -Options "y","Y","n","N"
-    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
 
     if($response -eq 'y' -or $response -eq 'Y') {
         Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
@@ -946,7 +946,7 @@ function Test-BasicsCursor
         # If we should also test the touch display.
         Write-Host -ForegroundColor White "Use the TrackPoint to move the cursor, left click, right click, and scroll."
         $response = Get-KeypressResponse -Prompt "Did the TrackPoint work normally? (Y/N): " -Options "y","Y","n","N"
-        $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+        $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
 
         if($response -eq 'y' -or $response -eq 'Y') {
             Add-Member -InputObject $trackpointValueObj -NotePropertyName Value -NotePropertyValue $true
@@ -981,7 +981,7 @@ function Test-BasicsCamera
     $process = Start-Process "C:\Program Files\Camera\Camera.exe" -PassThru
 
     $response = Get-KeypressResponse -Prompt "Is the camera working normally? (Y/N): " -Options "y","Y","n","N"
-    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
 
     if($response -eq 'y' -or $response -eq 'Y') {
         Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
@@ -1014,7 +1014,7 @@ function Test-BasicsPhysical
     Write-Host -ForegroundColor White "Push down on the machine's keyboard, then pick the machine up and twist the chassis from the corners."
 
     $response = Get-KeypressResponse -Prompt "Is the machine still operating normally? (Y/N): " -Options "y","Y","n","N"
-    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip): "
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
 
     if($response -eq 'y' -or $response -eq 'Y') {
         Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
