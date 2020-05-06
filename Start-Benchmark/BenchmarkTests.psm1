@@ -849,12 +849,13 @@ function Test-BasicsNetwork
         Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
         $testPassed = $false
     }
-    netsh wlan disconnect
-    Start-Sleep -Seconds 2
 
-    $wiredValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Wired Connection Works"
-    if($null -ne $wiredValueObj) {
+    $wiredObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Wired Connection Works"
+    if($null -ne $wiredObj) {
         # If we should also test the touch display.
+
+        $wiredValueObj = $wiredObj.Value
+
         Write-Host -ForegroundColor White "Connect the wired network adapter and verify that a webpage can be loaded."
         $response = Get-KeypressResponse -Prompt "Is the network adapter connected? (C)ontinue?: " -Options "c","C"
         Start-Process -FilePath "www.yahoo.com"
