@@ -644,7 +644,7 @@
         "CommandName": "BasicsCamera",
         "Results": [
             {
-                "Name": "Trackpad Works",
+                "Name": "Camera Works",
                 "Description": "The camera is detected by Windows and displays an image in the Camera app.",
                 "Type": "Boolean",
                 "Values": [
