@@ -815,7 +815,7 @@ function Test-BasicsSound
         Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
     }
 
-    return @{ "Result"=$testPassed; "TestObj"=$TestObj; }
+    return @{ "Result"=@{"Successful"=$testPassed}; "TestObj"=$TestObj; }
 }
 
 function Test-BasicsNetwork
