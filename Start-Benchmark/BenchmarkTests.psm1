@@ -836,7 +836,10 @@ function Test-BasicsNetwork
     netsh wlan connect name=Neumont
     Write-Host -ForegroundColor White "Connecting to Neumont Wi-Fi..."
     Start-Sleep -Seconds 3
-    $process = Start-Process -FilePath "www.msn.com"
+    Start-Process -FilePath "www.msn.com"
+    Start-Sleep -Seconds 3
+    Write-Host -ForegroundColor White "Disconnecting from Neumont Wi-Fi..."
+    netsh wlan disconnect
 
     $response = Get-KeypressResponse -Prompt "Did the webpage load? (Y/N): " -Options "y","Y","n","N"
 
@@ -847,7 +850,6 @@ function Test-BasicsNetwork
         $testPassed = $false
     }
     netsh wlan disconnect
-    Write-Host -ForegroundColor White "Disconnecting from Neumont Wi-Fi..."
     Start-Sleep -Seconds 2
 
     $wiredValueObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Wired Connection Works"
@@ -855,7 +857,7 @@ function Test-BasicsNetwork
         # If we should also test the touch display.
         Write-Host -ForegroundColor White "Connect the wired network adapter and verify that a webpage can be loaded."
         $response = Get-KeypressResponse -Prompt "Is the network adapter connected? (C)ontinue?: " -Options "c","C"
-        $process = Start-Process -FilePath "www.yahoo.com"
+        Start-Process -FilePath "www.yahoo.com"
         $response = Get-KeypressResponse -Prompt "Did the webpage load? (Y/N): " -Options "y","Y","n","N"
 
         if($response -eq 'y' -or $response -eq 'Y') {
@@ -889,8 +891,9 @@ function Test-BasicsKeyboard
     netsh wlan connect name=Neumont
     Write-Host -ForegroundColor White "Connecting to Neumont Wi-Fi..."
     Start-Sleep -Seconds 3
-    $process = Start-Process -FilePath "www.keyboardtester.com/tester.html"
+    Start-Process -FilePath "www.keyboardtester.com/tester.html"
     # Wait a bit for the page to load, then disconnect from Wi-Fi
+    Write-Host -ForegroundColor White "Disconnecting from Neumont Wi-Fi..."
     Start-Sleep -Seconds 3
     netsh wlan disconnect
 
@@ -978,7 +981,14 @@ function Test-BasicsCamera
 
     Write-Host -ForegroundColor White "Open the Camera application and verify that the camera is working normally."
    
-    $process = Start-Process "C:\Program Files\Camera\Camera.exe" -PassThru
+    netsh wlan connect name=Neumont
+    Write-Host -ForegroundColor White "Connecting to Neumont Wi-Fi..."
+    Start-Sleep -Seconds 3
+    Start-Process -FilePath "www.keyboardtester.com/tester.html"
+    # Wait a bit for the page to load, then disconnect from Wi-Fi
+    Write-Host -ForegroundColor White "Disconnecting from Neumont Wi-Fi..."
+    Start-Sleep -Seconds 3
+    netsh wlan disconnect
 
     $response = Get-KeypressResponse -Prompt "Is the camera working normally? (Y/N): " -Options "y","Y","n","N"
     $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
