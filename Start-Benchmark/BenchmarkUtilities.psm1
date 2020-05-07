@@ -187,7 +187,7 @@ function New-ResultData
         };
         "Tests" = [System.Collections.ArrayList]@();
         "TestsComplete" = $false;
-        "Passed" = $false;
+        "Passed" = $true;
     }
 }
 
