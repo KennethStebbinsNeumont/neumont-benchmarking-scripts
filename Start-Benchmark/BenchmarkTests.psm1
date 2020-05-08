@@ -145,7 +145,7 @@ function Test-Cinebench
             $comments += $comment
         }
     } else {
-        $comment = "Score was greater than the expected maximum."
+        $comment = "Score was lower than the expected maximum."
         Write-Host -ForegroundColor Red $comment
         $comments += $comment
         $testPassed = $false
