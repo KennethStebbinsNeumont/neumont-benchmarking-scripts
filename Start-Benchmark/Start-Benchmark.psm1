@@ -63,7 +63,7 @@
                 # If this applicable test wasn't included in the last run
                 Write-Host -ForegroundColor Yellow "The last benchmarking run didn't finish."
                 Write-Host -ForegroundColor Yellow "Last run test: $lastRunTest"
-                $response = Get-KeypressResponse -Prompt "Would you like to (c)ontinue, (r)estart, or (e)xit?: " -Options "c","r","e"
+                $response = Get-KeypressResponse -Prompt "Would you like to (c)ontinue, (r)estart, or (e)xit?: " -Options 'c', 'C', 'e', 'R', 'e', 'E'
                 if($response -eq 'c' -or $response -eq 'C') {
                     $startNewRun = $false
                 } elseif($response -eq 'e' -or $response -eq 'E') {
@@ -120,10 +120,40 @@
     if($resultData.Passed) {
         Write-Host -ForegroundColor Green "All tests passed."
     } else {
-        Write-Host -ForegroundColor Red "One or more tests failed."
+        Write-Host -ForegroundColor Red "One or more tests failed:"
+        :testLoop foreach($test in $resultData.Tests) {
+            $failedResultStrings = [System.Collections.ArrayList]@()
+            :resultLoop foreach($result in $test.Results) {
+                $valueObj = $result.Values
+                if($result.Type -eq "Boolean" -and $valueObj.Value -ne $valueObj.Expected) {
+                    $failedResultStrings.Add("$($result.Name) actual value ($($valueObj.Value)) did not match expected value ($($valueObj.Expected)).")
+                } elseif($result.Type -eq "Number") {
+                    if($result.HigherIsBetter -and $valueObj.Value -lt $valueObj.Min) {
+                        $failedResultStrings.Add("$($result.Name) value ($($valueObj.Value)) was lower than minimum value ($($valueObj.Min)).")
+                    } elseif(!$result.HigherIsBetter -and $valueObj.Value -gt $valueObj.Max) {
+                        $failedResultStrings.Add("$($result.Name) value ($($valueObj.Value)) was higher than maximum value ($($valueObj.Max)).")
+                    }
+                }
+            }
+
+            if($failedResults.Count -gt 0) {
+                # If at least one result has failed
+                Write-Host -ForegroundColor Red "$($test.Name) failed."
+                foreach($string in $failedResultStrings) {
+                    Write-Host -ForegroundColor White "`t$string"
+                }
+            }
+        }
+        
     }
 
     Write-Host -ForegroundColor White "The transcript of this test has been saved to $($resultData.FilePath)"
+
+    $response = Get-KeypressResponse -Prompt "Would you like to open the result file? (Y/N): " -Options 'y', 'Y', 'n', 'N'
+
+    if($response -eq 'y' -or $response -eq 'Y') {
+        Start-Process -FilePath "notepad.exe" -ArgumentList "$($resultData.FilePath)"
+    }
 }
 
 Export-ModuleMember -Function "Start-Benchmark"
