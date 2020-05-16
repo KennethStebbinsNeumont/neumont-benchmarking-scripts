@@ -349,7 +349,7 @@ function Test-Heaven
 
 
     $scoreResponse = Get-DoubleResponse -Prompt "What score did Heaven give?: "
-    $cpuTempResponse = Get-DoubleResponse -Prompt "What average CPU max core temperaturee did HWiNFO64 report?: "
+    $cpuTempResponse = Get-DoubleResponse -Prompt "What average CPU max core temperature did HWiNFO64 report?: "
     $gpuTempResponse = Get-DoubleResponse -Prompt "What average GPU core temperature did HWiNFO64 report?: "
 
     $testPassed = $true
