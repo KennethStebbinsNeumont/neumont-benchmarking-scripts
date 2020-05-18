@@ -461,7 +461,7 @@ function Test-Prime95
             $comments += $comment
         }
     } else {
-        $comment = "Average GPU core temperature was higher than the expected maximum."
+        $comment = "Average CPU core temperature was higher than the expected maximum."
         Write-Host -ForegroundColor Red $comment
         Add-Member -InputObject $tempResponse -NotePropertyName "Comment" -NotePropertyValue $comment
         $comments += $comment
