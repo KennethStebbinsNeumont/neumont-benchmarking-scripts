@@ -6,7 +6,7 @@
         "Results": [
             {
                 "Name": "BIOS Up-to-date",
-                "Description": "Wether the currently installed BIOS version is the most recent version available.",
+                "Description": "Whether the currently installed BIOS version is the most recent version available.",
                 "Type": "Boolean",
                 "Values": [
                     {
