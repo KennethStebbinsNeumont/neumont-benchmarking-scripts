@@ -493,39 +493,6 @@
         ]
     },
     {
-        "Name": "Basics: Display Test",
-        "Description": "Observe the display while it's displaying different colors to verify that it is free of defects. On models with touchscreens, verify the touchscreen works, too.",
-        "CommandName": "BasicsDisplay",
-        "Results": [
-            {
-                "Name": "No LCD Defects Detected",
-                "Description": "No defects were seen in the display.",
-                "Type": "Boolean",
-                "Values": [
-                    {
-                        "Model": "*",
-                        "Expected": true
-                    }
-                ]
-            },
-            {
-                "Name": "Touchscreen Works",
-                "Description": "Touchscreen reliably detects taps, drags, and multi-point gestures.",
-                "Type": "Boolean",
-                "Values": [
-                    {
-                        "Model": "20GR*",
-                        "Expected": true
-                    },
-                    {
-                        "Model": "Precision 5520",
-                        "Expected": true
-                    }
-                ]
-            }
-        ]
-    },
-    {
         "Name": "Basics: HDMI Test",
         "Description": "Connect the machine to an HDMI monitor and verify that an image is displayed.",
         "CommandName": "BasicsHDMI",
@@ -620,6 +587,24 @@
         ]
     },
     {
+        "Name": "Basics: Camera",
+        "Description": "Test the device's camera.",
+        "CommandName": "BasicsCamera",
+        "Results": [
+            {
+                "Name": "Camera Works",
+                "Description": "The camera is detected by Windows and displays an image in the Camera app.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
         "Name": "Basics: Cursor",
         "Description": "Test the device's cursor input.",
         "CommandName": "BasicsCursor",
@@ -649,17 +634,32 @@
         ]
     },
     {
-        "Name": "Basics: Camera",
-        "Description": "Test the device's camera.",
-        "CommandName": "BasicsCamera",
+        "Name": "Basics: Display Test",
+        "Description": "Observe the display while it's displaying different colors to verify that it is free of defects. On models with touchscreens, verify the touchscreen works, too.",
+        "CommandName": "BasicsDisplay",
         "Results": [
             {
-                "Name": "Camera Works",
-                "Description": "The camera is detected by Windows and displays an image in the Camera app.",
+                "Name": "No LCD Defects Detected",
+                "Description": "No defects were seen in the display.",
                 "Type": "Boolean",
                 "Values": [
                     {
                         "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            },
+            {
+                "Name": "Touchscreen Works",
+                "Description": "Touchscreen reliably detects taps, drags, and multi-point gestures.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "20GR*",
+                        "Expected": true
+                    },
+                    {
+                        "Model": "Precision 5520",
                         "Expected": true
                     }
                 ]
