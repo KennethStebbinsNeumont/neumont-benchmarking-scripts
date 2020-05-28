@@ -127,6 +127,9 @@
                 $valueObj = $result.Values
                 if($result.Type -eq "Boolean" -and $valueObj.Value -ne $valueObj.Expected) {
                     $failedResultStrings.Add("$($result.Name) actual value ($($valueObj.Value)) did not match expected value ($($valueObj.Expected)).")
+                    if($valueObj.Comment) {
+                        $failedResultStrings.Add($valueObj.Comment)
+                    }
                 } elseif($result.Type -eq "Number") {
                     if($result.HigherIsBetter -and $valueObj.Value -lt $valueObj.Min) {
                         $failedResultStrings.Add("$($result.Name) value ($($valueObj.Value)) was lower than minimum value ($($valueObj.Min)).")
@@ -136,7 +139,7 @@
                 }
             }
 
-            if($failedResults.Count -gt 0) {
+            if($failedResultStrings.Count -gt 0) {
                 # If at least one result has failed
                 Write-Host -ForegroundColor Red "$($test.Name) failed."
                 foreach($string in $failedResultStrings) {
