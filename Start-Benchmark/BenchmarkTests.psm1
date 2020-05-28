@@ -618,13 +618,11 @@ function Test-BasicsUSB
         [Int]$FailDelaySeconds=10
     )
 
-    $cursorPositionBeforeTest = $host.UI.RawUI.CursorPosition
     $testPassed = $true
     foreach($result in $TestObj.Results) {
         Write-Host -ForegroundColor White $result.Name
         Write-Host -ForegroundColor White "Please connect a drive to the port indicated above."
 
-        $cursorPositionBeforeLoop = $host.UI.RawUI.CursorPosition
         $removableDrive = $null
         $continue = $true
         while($continue) {
