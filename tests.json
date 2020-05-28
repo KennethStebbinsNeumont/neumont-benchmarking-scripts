@@ -312,7 +312,7 @@
                     {
                         "Model": "Precision 5520",
                         "Min": 80,
-                        "Max": 99
+                        "Max": 92
                     },
                     {
                         "Model": "20ME*",
@@ -327,7 +327,7 @@
                     {
                         "Model": "20GR*",
                         "Min": 75,
-                        "Max": 90
+                        "Max": 92
                     }
                 ]
             }
