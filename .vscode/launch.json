@@ -8,9 +8,11 @@
             "name": "Launch: Short Tests",
             "type": "PowerShell",
             "request": "launch",
-            "script": "${workspaceFolder}/Start-Benchmark",
+            "script": "${workspaceFolder}\\Misc\\startBenchmarks-test.ps1",
             "cwd": "${workspaceFolder}",
-            "args": ["-TestDefinitionsPath", ".\\Misc\\shorttests.json"]
+            "args": ["-TestDefinitionsPath", ".\\Misc\\shorttests.json", 
+                "-DBDirectoryPath", ".\\Misc\\", "-StartBenchmarkModulePath", 
+                ".\\Start-Benchmark\\Start-Benchmark.psd1" ]
         }
     ]
 }
