@@ -1062,6 +1062,7 @@ function Test-BasicsPhysical
 }
 
 # Exports
+Export-ModuleMember -Function "Test-NumberResponse"
 Export-ModuleMember -Function "Test-BIOSVersion"
 Export-ModuleMember -Function "Test-IPDT"
 Export-ModuleMember -Function "Test-Cinebench"
