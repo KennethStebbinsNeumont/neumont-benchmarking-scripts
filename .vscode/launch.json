@@ -10,7 +10,7 @@
             "request": "launch",
             "script": "${workspaceFolder}/Start-Benchmark",
             "cwd": "${workspaceFolder}",
-            "args": []
+            "args": ["-TestDefinitionsPath", ".\\Misc\\shorttests.json"]
         }
     ]
 }
