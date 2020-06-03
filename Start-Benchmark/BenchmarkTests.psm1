@@ -663,6 +663,8 @@ function Test-BasicsUSB
                     $testPassed = $false
                 }
             }
+
+            Write-Host
         }
 
     }
