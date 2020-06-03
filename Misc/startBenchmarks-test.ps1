@@ -4,9 +4,9 @@ Param(
     [String]$StartBenchmarkModulePath
 )
 
-Import-Module "$StartBenchmarkModulePath"
+Remove-Module Start-Benchmark -ErrorAction SilentlyContinue
+Remove-Module Benchmark* -ErrorAction SilentlyContinue
+
+Import-Module "$StartBenchmarkModulePath" -ErrorAction Stop
 
 Start-Benchmark -DBDirectoryPath "$DBDirectoryPath" -TestDefinitionsPath "$TestDefinitionsPath"
-
-Remove-Module Start-Benchmark
-Remove-Module Benchmark* -ErrorAction SilentlyContinue
