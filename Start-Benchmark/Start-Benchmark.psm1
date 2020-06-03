@@ -94,10 +94,15 @@
             # Skip this test if it was already done in a previous run
             continue
         }
-
+        
+        Write-Host
+        Write-Host
         Write-Host -ForegroundColor Magenta "Running test #$i"
-        Write-Host -ForegroundColor White $test.Name
+        Write-Host -ForegroundColor Black -BackgroundColor Gray $test.Name
+        Write-Host
         Write-Host -ForegroundColor Gray $test.Description
+        Write-Host
+        Write-Host
 
         $command = Get-Command -Verb "Test" -Noun $test.CommandName -Module "BenchmarkTests"
 
