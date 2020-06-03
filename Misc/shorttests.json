@@ -19,13 +19,13 @@
         "StopOnFail": false
     },
     {
-        "Name": "Cinebench",
-        "Description": "This is just a test.",
-        "CommandName": "Cinebench",
+        "Name": "Test a numeric response",
+        "Description": "Ur mum",
+        "CommandName": "NumberResponse",
         "Results": [
             {
-                "Name": "Cinebench Score",
-                "Description": "SKORE",
+                "Name": "NumberValue",
+                "Description": "It's a number, you waffle.",
                 "Type": "Number",
                 "Values": [
                     {
@@ -35,7 +35,6 @@
                     }
                 ]
             }
-        ],
-        "StopOnFail": false
+        ]
     }
 ]

@@ -1,3 +1,22 @@
+function Test-NumberResponse
+{
+    [Parameter(Mandatory=$true,Position=1)]
+            [Object]$TestObj,
+        [Object]$Common
+
+    $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "NumberValue"
+    $valueObj = $resultObj.Value
+
+    $valueResponse = Get-DoubleResponse -Prompt "Pick a number within [100-200]: "
+
+    Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $valueResponse
+
+    $result = @{ "Successful" = $valueResponse -ge 100 -and $valueResponse -le 200; 
+                "Message" = "Given number was $valueResponse." }
+
+    return @{ "Result"=$result; "TestObj"=$TestObj; }
+}
+
 function Test-BIOSVersion
 {
     Param(
