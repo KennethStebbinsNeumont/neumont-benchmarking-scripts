@@ -153,7 +153,7 @@
 
             if($failedResultStrings.Count -gt 0) {
                 # If at least one result has failed
-                Write-Host -ForegroundColor Red "$($test.Name) failed."
+                Write-Host -ForegroundColor Red "`"$($test.Name)`" failed."
                 foreach($string in $failedResultStrings) {
                     Write-Host -ForegroundColor Red "`t$string"
                 }
