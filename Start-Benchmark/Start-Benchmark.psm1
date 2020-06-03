@@ -2,8 +2,7 @@
 {
     [CmdletBinding()]
     Param(
-        [Parameter(Mandatory=$true)]
-            [String]$DBDirectoryPath,
+        [String]$DBDirectoryPath,
         [String]$ResultDataFilePath,
         [String]$TestDefinitionsPath,
         [Switch]$RestartTest
@@ -12,6 +11,10 @@
     $systemInfo = Get-SystemInfo
     $dateString = Get-Date -Format "yyyyMMdd"
     $timeString = Get-Date -Format "HHmmss"
+
+    if($null -eq $DBDirectoryPath) {
+        $DBDirectoryPath = (Get-Location).Path
+    }
 
     if($null -eq $TestDefinitionsPath) {
         $TestDefinitionsPath = "$DBDirectoryPath\tests.json"
