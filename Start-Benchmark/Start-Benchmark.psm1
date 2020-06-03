@@ -94,7 +94,7 @@
             # Skip this test if it was already done in a previous run
             continue
         }
-        
+
         Write-Host
         Write-Host
         Write-Host -ForegroundColor Magenta "Running test #$i"
@@ -138,15 +138,15 @@
             :resultLoop foreach($result in $test.Results) {
                 $valueObj = $result.Value
                 if($result.Type -eq "Boolean" -and $valueObj.Value -ne $valueObj.Expected) {
-                    $failedResultStrings.Add("$($result.Name) actual value ($($valueObj.Value)) did not match expected value ($($valueObj.Expected)).")
+                    $failedResultStrings.Add("`"$($result.Name)`" actual value ($($valueObj.Value)) did not match expected value ($($valueObj.Expected)).") | Out-Null
                     if($valueObj.Comment) {
                         $failedResultStrings.Add($valueObj.Comment) | Out-Null
                     }
                 } elseif($result.Type -eq "Number") {
                     if($result.HigherIsBetter -and $valueObj.Value -lt $valueObj.Min) {
-                        $failedResultStrings.Add("$($result.Name) value ($($valueObj.Value)) was lower than minimum value ($($valueObj.Min)).")
+                        $failedResultStrings.Add("`"$($result.Name)`" value ($($valueObj.Value)) was lower than minimum value ($($valueObj.Min)).") | Out-Null
                     } elseif(!$result.HigherIsBetter -and $valueObj.Value -gt $valueObj.Max) {
-                        $failedResultStrings.Add("$($result.Name) value ($($valueObj.Value)) was higher than maximum value ($($valueObj.Max)).")
+                        $failedResultStrings.Add("`"$($result.Name)`" value ($($valueObj.Value)) was higher than maximum value ($($valueObj.Max)).") | Out-Null
                     }
                 }
             }
@@ -157,7 +157,6 @@
                 foreach($string in $failedResultStrings) {
                     Write-Host -ForegroundColor Red "`t$string"
                 }
-                Write-Host
             }
         }
         
