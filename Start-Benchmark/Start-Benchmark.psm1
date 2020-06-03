@@ -120,18 +120,22 @@
     $resultData.TestsComplete = $true
     Save-ResultData -ResultData $resultData
 
+    Write-Host
+    Write-Host
+
     if($resultData.Passed) {
         Write-Host -ForegroundColor Green "All tests passed."
     } else {
         Write-Host -ForegroundColor Red "One or more tests failed:"
+        Write-Host
         :testLoop foreach($test in $resultData.Tests) {
             $failedResultStrings = [System.Collections.ArrayList]@()
             :resultLoop foreach($result in $test.Results) {
-                $valueObj = $result.Values
+                $valueObj = $result.Value
                 if($result.Type -eq "Boolean" -and $valueObj.Value -ne $valueObj.Expected) {
                     $failedResultStrings.Add("$($result.Name) actual value ($($valueObj.Value)) did not match expected value ($($valueObj.Expected)).")
                     if($valueObj.Comment) {
-                        $failedResultStrings.Add($valueObj.Comment)
+                        $failedResultStrings.Add($valueObj.Comment) | Out-Null
                     }
                 } elseif($result.Type -eq "Number") {
                     if($result.HigherIsBetter -and $valueObj.Value -lt $valueObj.Min) {
@@ -146,13 +150,15 @@
                 # If at least one result has failed
                 Write-Host -ForegroundColor Red "$($test.Name) failed."
                 foreach($string in $failedResultStrings) {
-                    Write-Host -ForegroundColor White "`t$string"
+                    Write-Host -ForegroundColor Red "`t$string"
                 }
+                Write-Host
             }
         }
         
     }
 
+    Write-Host
     Write-Host -ForegroundColor White "The transcript of this test has been saved to $($resultData.FilePath)"
 
     $response = Get-KeypressResponse -Prompt "Would you like to open the result file? (Y/N): " -Options 'y', 'Y', 'n', 'N'
@@ -160,6 +166,8 @@
     if($response -eq 'y' -or $response -eq 'Y') {
         Start-Process -FilePath "notepad.exe" -ArgumentList "$($resultData.FilePath)"
     }
+
+    Write-Host
 }
 
 Export-ModuleMember -Function "Start-Benchmark"
