@@ -27,6 +27,7 @@
                 "Name": "NumberValue",
                 "Description": "It's a number, you waffle.",
                 "Type": "Number",
+                "HigherIsBetter": true,
                 "Values": [
                     {
                         "Model": "*",
