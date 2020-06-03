@@ -8,6 +8,24 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     }
 }
 
-New-Item -Path 'C:\Program Files (x86)\MonitorTest\' -ItemType Directory -ErrorAction Stop -InformationAction Ignore
+if (!Test-Path -LiteralPath 'C:\Program Files (x86)\MonitorTest\' -Type Container) {
+    try {
+        New-Item -Path 'C:\Program Files (x86)\MonitorTest\' -ItemType Directory -ErrorAction Stop | Out-Null
+        Write-Host -ForegroundColor Cyan "Created installation directory at C:\Program Files (x86)\MonitorTest\"
+    } catch {
+        Write-Host -ForegroundColor Red "Unable to create a folder at C:\Program Files (x86)\MonitorTest\"
+        Write-Host -ForegroundColor White "Press ENTER to exit..."
+        Read-Host | Out-Null
+        exit 1
+    }
+}
 
-Copy-Item -Path "$PSScriptRoot\monitorTest.exe" -Destination 'C:\Program Files (x86)\MonitorTest\'
+try {
+    Copy-Item -Path "$PSScriptRoot\monitorTest.exe" -Destination 'C:\Program Files (x86)\MonitorTest\' -Force -ErrorAction Stop
+    Write-Host -ForegroundColor Cyan "Copied monitorTest.exe into installation directory"
+} catch {
+    Write-Host -ForegroundColor Red "Unable to copy monitorTest.exe from script's root directory to installation directory."
+    Write-Host -ForegroundColor White "Press ENTER to exit..."
+    Read-Host | Out-Null
+    exit 1
+}
