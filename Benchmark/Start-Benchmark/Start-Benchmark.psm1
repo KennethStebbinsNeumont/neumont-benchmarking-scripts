@@ -99,7 +99,6 @@
         Write-Host
         Write-Host -ForegroundColor Magenta "Running test #$i"
         Write-Host -ForegroundColor Black -BackgroundColor Gray $test.Name
-        Write-Host
         Write-Host -ForegroundColor Gray $test.Description
         Write-Host
         Write-Host
