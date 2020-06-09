@@ -586,7 +586,7 @@ function Test-WinMemDiag
         Write-Host -ForegroundColor White "This test indicates whether it passed via a notification in the notification center. It may take a few minutes to appear after rebooting."
         Write-Host
 
-        Start-Process -FilePath "$($Env:windir)\system32\MdSched.exe" -WorkingDirectory "%windir%\system32" | Out-Null
+        Start-Process -FilePath "C:\Windows\system32\MdSched.exe" -WorkingDirectory "%windir%\system32" | Out-Null
     } elseif($response -eq 'y' -or $response -eq 'Y') {
         # If we're returning after rebooting
         $response = Get-KeypressResponse -Prompt "Did the test pass? (Y/N/(S)kip): " -Options 'y','Y','n','N','s','S'
