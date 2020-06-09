@@ -780,7 +780,7 @@ function Test-BasicsSound
     $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Play the windows test tone and listen for channel balance, speaker rattling, or sound distortion."
-    Write-Host -ForegroundColor Yellow "Verify beforehand that `"Audio Enhancemens`" are off in the speakers sound device advanced settings."
+    Write-Host -ForegroundColor Yellow "Verify beforehand that `"Audio Enhancements`" are off in the speakers sound device advanced settings."
 
     $response = Get-KeypressResponse -Prompt "Do the speakers sound balanced and free from rattling and distortion? (Y/N): " -Options "y","Y","n","N"
     $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
@@ -979,8 +979,6 @@ function Test-BasicsCamera
     
     $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Camera Works"
     $valueObj = $resultObj.Value
-
-    Write-Host -ForegroundColor White "Open the Camera application and verify that the camera is working normally."
    
     netsh wlan connect name=Neumont
     Write-Host -ForegroundColor White "Connecting to Neumont Wi-Fi..."
@@ -992,6 +990,49 @@ function Test-BasicsCamera
     netsh wlan disconnect
 
     $response = Get-KeypressResponse -Prompt "Is the camera working normally? (Y/N): " -Options "y","Y","n","N"
+    $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
+
+    if($response -eq 'y' -or $response -eq 'Y') {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $true
+        $result = @{ "Successful" = $true; }
+    } else {
+        Add-Member -InputObject $valueObj -NotePropertyName Value -NotePropertyValue $false
+        $result = @{ "Successful" = $false; }
+    }
+    
+    if($null -ne $commentResponse -and "" -ne $commentResponse) {
+        Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
+    }
+
+    return @{ "Result"=$result; "TestObj"=$TestObj; }
+}
+
+function Test-BasicsMic
+{
+    Param(
+        [Parameter(Mandatory=$true,Position=1)]
+            [Object]$TestObj,
+        [Object]$Common
+    )
+
+    $result = $null
+    
+    $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Mic Works"
+    $valueObj = $resultObj.Value
+
+    Write-Host -ForegroundColor White -BackgroundColor Black "CONNECT HEADPHONES BEFORE STARTING"
+    Write-Host -ForegroundColor White "On the webpage, click `"Check Microphone`", then turn up the playback volume with the slider in the upper left corner of the box."
+   
+    netsh wlan connect name=Neumont
+    Write-Host -ForegroundColor White "Connecting to Neumont Wi-Fi..."
+    Start-Sleep -Seconds 3
+    Start-Process -FilePath "https://webcammictest.com/check-mic.html"
+    # Wait a bit for the page to load, then disconnect from Wi-Fi
+    Write-Host -ForegroundColor White "Disconnecting from Neumont Wi-Fi..."
+    Start-Sleep -Seconds 3
+    netsh wlan disconnect
+
+    $response = Get-KeypressResponse -Prompt "Is the microphone working normally? (Y/N): " -Options "y","Y","n","N"
     $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
 
     if($response -eq 'y' -or $response -eq 'Y') {
@@ -1060,4 +1101,5 @@ Export-ModuleMember -Function "Test-BasicsNetwork"
 Export-ModuleMember -Function "Test-BasicsKeyboard"
 Export-ModuleMember -Function "Test-BasicsCursor"
 Export-ModuleMember -Function "Test-BasicsCamera"
+Export-ModuleMember -Function "Test-BasicsMic"
 Export-ModuleMember -Function "Test-BasicsPhysical"

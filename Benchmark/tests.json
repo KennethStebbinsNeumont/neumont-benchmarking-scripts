@@ -511,35 +511,6 @@
         ]
     },
     {
-        "Name": "Basics: Sound",
-        "Description": "Test the device's speakers and headphone jack, verifying that all channels sound balanced and do not have a rattle or sound distorted.",
-        "CommandName": "BasicsSound",
-        "Results": [
-            {
-                "Name": "Speakers Passed",
-                "Description": "Whether the speakers sound balanced and do not have a rattle or sound distorted.",
-                "Type": "Boolean",
-                "Values": [
-                    {
-                        "Model": "*",
-                        "Expected": true
-                    }
-                ]
-            },
-            {
-                "Name": "Headphone Jack Passed",
-                "Description": "Whether the headphones connected to the headphone jack sound balanced.",
-                "Type": "Boolean",
-                "Values": [
-                    {
-                        "Model": "*",
-                        "Expected": true
-                    }
-                ]
-            }
-        ]
-    },
-    {
         "Name": "Basics: Network",
         "Description": "Test the device's network connectivity.",
         "CommandName": "BasicsNetwork",
@@ -569,13 +540,42 @@
         ]
     },
     {
-        "Name": "Basics: Keyboard",
-        "Description": "Test the device's keyboard.",
-        "CommandName": "BasicsKeyboard",
+        "Name": "Basics: Sound",
+        "Description": "Test the device's speakers and headphone jack, verifying that all channels sound balanced and do not have a rattle or sound distorted.",
+        "CommandName": "BasicsSound",
         "Results": [
             {
-                "Name": "All Keys Work",
-                "Description": "All keys on the keyboard are registed in the OS.",
+                "Name": "Speakers Passed",
+                "Description": "Whether the speakers sound balanced and do not have a rattle or sound distorted.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            },
+            {
+                "Name": "Headphone Jack Passed",
+                "Description": "Whether the headphones connected to the headphone jack sound balanced.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "Basics: Microphone",
+        "Description": "Test the device's microphone.",
+        "CommandName": "BasicsMic",
+        "Results": [
+            {
+                "Name": "Camera Works",
+                "Description": "The microphone is detected by Windows and sounds clear.",
                 "Type": "Boolean",
                 "Values": [
                     {
@@ -593,7 +593,25 @@
         "Results": [
             {
                 "Name": "Camera Works",
-                "Description": "The camera is detected by Windows and displays an image in the Camera app.",
+                "Description": "The camera is detected by Windows and displays an image in the web browser.",
+                "Type": "Boolean",
+                "Values": [
+                    {
+                        "Model": "*",
+                        "Expected": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Name": "Basics: Keyboard",
+        "Description": "Test the device's keyboard.",
+        "CommandName": "BasicsKeyboard",
+        "Results": [
+            {
+                "Name": "All Keys Work",
+                "Description": "All keys on the keyboard are registed in the OS.",
                 "Type": "Boolean",
                 "Values": [
                     {
