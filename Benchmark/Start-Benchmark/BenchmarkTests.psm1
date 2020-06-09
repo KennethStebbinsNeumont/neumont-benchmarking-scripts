@@ -95,6 +95,7 @@ function Test-IPDT
     $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Wait until the test completes, then indicate whether the test passed."
+    Write-Host
 
     $process = Start-Process -FilePath "C:\Program Files\Intel Corporation\Intel Processor Diagnostic Tool 64bit\Win-IPDT64.exe" -WorkingDirectory "C:\Program Files\Intel Corporation\Intel Processor Diagnostic Tool 64bit\" -PassThru
 
@@ -129,6 +130,7 @@ function Test-Cinebench
 
     Write-Host -ForegroundColor White "Click `"Run`", wait until the test completes, then enter the given score."
     Write-Host -ForegroundColor White "The expected point range for this machine is $($scoreValueObj.Min)-$($scoreValueObj.Max)."
+    Write-Host
 
     $process = Start-Process -FilePath "C:\Program Files\Cinebench R20\Cinebench.exe" -WorkingDirectory "C:\Program Files\Cinebench R20" -PassThru
 
@@ -187,6 +189,7 @@ function Test-FurMarkdGPU
     Write-Host -ForegroundColor White "Click the `"1080p`" preset, wait until the test completes, then enter the given score and average GPU core temperature."
     Write-Host -ForegroundColor White "The expected point range for this machine is $($scoreValueObj.Min)-$($scoreValueObj.Max)."
     Write-Host -ForegroundColor White "The expected GPU core temperature range for this machine is $($tempValueObj.Min)-$($tempValueObj.Max)."
+    Write-Host
 
     $process = Start-Process -FilePath "C:\Program Files (x86)\Geeks3D\Benchmarks\FurMark\FurMark.exe" -WorkingDirectory "C:\Program Files (x86)\Geeks3D\Benchmarks\FurMark" -PassThru
 
@@ -261,6 +264,7 @@ function Test-FurMarkiGPU
     Write-Host -ForegroundColor White "Click the `"1080p`" preset, wait until the test completes, then enter the given score and average GPU core temperature."
     Write-Host -ForegroundColor White "The expected point range for this machine is $($scoreValueObj.Min)-$($scoreValueObj.Max)."
     Write-Host -ForegroundColor White "The expected GPU core temperature range for this machine is $($tempValueObj.Min)-$($tempValueObj.Max)."
+    Write-Host
 
     $process = Start-Process -FilePath "C:\Program Files (x86)\Geeks3D\Benchmarks\FurMark - iGPU\FurMark - iGPU.exe" -WorkingDirectory "C:\Program Files (x86)\Geeks3D\Benchmarks\FurMark - iGPU" -PassThru
 
@@ -339,6 +343,7 @@ function Test-Heaven
     Write-Host -ForegroundColor White "The expected point range for this machine is $($scoreValueObj.Min)-$($scoreValueObj.Max)."
     Write-Host -ForegroundColor White "The expected average GPU core temperature range for this machine is $($gpuTempValueObj.Min)-$($gpuTempValueObj.Max)."
     Write-Host -ForegroundColor White "The expected average CPU max core temperature range for this machine is $($cpuTempValueObj.Min)-$($cpuTempValueObj.Max)."
+    Write-Host
 
     if(Get-Process | Where-Object {$_.ProcessName -eq "HWiNFO64"} -eq $null) {
         # Start HWiNFO64 if it isn't already running
@@ -440,6 +445,7 @@ function Test-Prime95
     Write-Host -ForegroundColor White "Open HWiNFO64 in sensors-only mode. Choose the `"Small FFTs`" preset in Prime95 and click `"OK`". Reset the counters in HWiNFO (click the clock icon)."
     Write-Host -ForegroundColor White "Wait for at least 15 minutes, then enter the average CPU max core temperature."
     Write-Host -ForegroundColor White "The expected CPU max core temperature range for this machine is $($tempValueObj.Min)-$($tempValueObj.Max)."
+    Write-Host
 
     $hwinfoProcess = Get-Process | Where-Object {$_.ProcessName -eq "HWiNFO64"}
     if($null -eq $hwinfoProcess) {
@@ -507,6 +513,7 @@ function Test-MemTest64
     Write-Host -ForegroundColor White "Wait until the test completes, then indicate whether the test passed."
     Write-Host -ForegroundColor White "This test is notoriously tricky. You may need to reboot a few times or boot into safe mode in order to get it to start."
     Write-Host -ForegroundColor White "If you cannot get the test to run, skip it and run the Windows Memory Diagnostic instead."
+    Write-Host
 
     $process = Start-Process -FilePath "C:\Program Files\MemTest64\MemTest64.exe" -WorkingDirectory "C:\Program Files\MemTest64" -PassThru
 
@@ -556,7 +563,7 @@ function Test-WinMemDiag
     $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "No Errors Detected"
     $valueObj = $resultObj.Value
 
-    $response = Get-KeypressResponse -Prompt "Did MemTest64 start properly? (Y/N): " -Options 'y','Y','n','N'
+    $response = Get-KeypressResponse -Prompt "Was MemTest64 successful? (Y/N): " -Options 'y','Y','n','N'
     if($response -eq 'y' -or $response -eq 'Y') {
         # Skip this test if MemTest64 started properly
         Write-Host -ForegroundColor White "Skipping this test..."
@@ -577,6 +584,7 @@ function Test-WinMemDiag
 
         Write-Host -ForegroundColor White "Wait until the test completes, then indicate whether the test passed."
         Write-Host -ForegroundColor White "This test indicates whether it passed via a notification in the notification center. It may take a few minutes to appear after rebooting."
+        Write-Host
 
         Start-Process -FilePath "$($Env:windir)\system32\MdSched.exe" -WorkingDirectory "%windir%\system32" | Out-Null
     } elseif($response -eq 'y' -or $response -eq 'Y') {
@@ -622,6 +630,7 @@ function Test-BasicsUSB
     foreach($result in $TestObj.Results) {
         Write-Host -ForegroundColor White $result.Name
         Write-Host -ForegroundColor White "Please connect a drive to the port indicated above."
+        Write-Host
 
         $removableDrive = $null
         $continue = $true
@@ -687,6 +696,7 @@ function Test-BasicsDisplay
 
     Write-Host -ForegroundColor White "Test the display showing all white, black, red, green and blue."
     Write-Host -ForegroundColor White "Search for light spots, stuck pixels, and scratches in the top layer."
+    Write-Host
 
     $process = Start-Process -FilePath "C:\Program Files (x86)\MonitorTest\monitorTest.exe" -PassThru
 
@@ -718,6 +728,7 @@ function Test-BasicsDisplay
         Write-Host -ForegroundColor White "Go to the web browser and test that you can pinch zoom on it."
         Write-Host -ForegroundColor White "On the desktop, test dragging an icon around to all four corners of the display, then back to the center."
         Write-Host -ForegroundColor White "On the desktop, tap with 5 fingers and verify that all 5 taps appear."
+        Write-Host
 
         $response = Get-KeypressResponse -Prompt "Did the touch tests pass? (Y/N): " -Options "y","Y","n","N"
         $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
@@ -752,6 +763,7 @@ function Test-BasicsHDMI
 
     Write-Host -ForegroundColor White "Connect the machine to an HDMI monitor and verify that an image from the laptop is displayed."
     Write-Host -ForegroundColor Yellow "Wait for a minimum of 30 seconds after connecting to the display before marking this test as failed."
+    Write-Host
 
     $response = Get-KeypressResponse -Prompt "Was an image displayed? (Y/N): " -Options "y","Y","n","N"
 
@@ -781,6 +793,7 @@ function Test-BasicsSound
 
     Write-Host -ForegroundColor White "Play the windows test tone and listen for channel balance, speaker rattling, or sound distortion."
     Write-Host -ForegroundColor Yellow "Verify beforehand that `"Audio Enhancements`" are off in the speakers sound device advanced settings."
+    Write-Host
 
     $response = Get-KeypressResponse -Prompt "Do the speakers sound balanced and free from rattling and distortion? (Y/N): " -Options "y","Y","n","N"
     $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
@@ -800,6 +813,7 @@ function Test-BasicsSound
     $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Connect headphones to the headphone jack, then play the windows test tone and listen for channel balance."
+    Write-Host
 
     $response = Get-KeypressResponse -Prompt "Do the headphones sound balanced? (Y/N): " -Options "y","Y","n","N"
     $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
@@ -832,6 +846,7 @@ function Test-BasicsNetwork
     $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Connect to Wi-Fi and verify that a webpage can be loaded."
+    Write-Host
     
     netsh wlan connect name=Neumont
     Write-Host -ForegroundColor White "Connecting to Neumont Wi-Fi..."
@@ -839,6 +854,7 @@ function Test-BasicsNetwork
     Start-Process -FilePath "www.msn.com"
     Start-Sleep -Seconds 3
     Write-Host -ForegroundColor White "Disconnecting from Neumont Wi-Fi..."
+    Write-Host
     netsh wlan disconnect
 
     $response = Get-KeypressResponse -Prompt "Did the webpage load? (Y/N): " -Options "y","Y","n","N"
@@ -857,8 +873,12 @@ function Test-BasicsNetwork
         $wiredValueObj = $wiredObj.Value
 
         Write-Host -ForegroundColor White "Connect the wired network adapter and verify that a webpage can be loaded."
+        Write-Host
         $response = Get-KeypressResponse -Prompt "Is the network adapter connected? (C)ontinue?: " -Options "c","C"
+        Write-Host
+
         Start-Process -FilePath "www.yahoo.com"
+
         $response = Get-KeypressResponse -Prompt "Did the webpage load? (Y/N): " -Options "y","Y","n","N"
 
         if($response -eq 'y' -or $response -eq 'Y') {
@@ -888,6 +908,7 @@ function Test-BasicsKeyboard
     $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Go to keyboardtester.com/tester.html and verify that every keyboard key registers in the OS."
+    Write-Host
 
     netsh wlan connect name=Neumont
     Write-Host -ForegroundColor White "Connecting to Neumont Wi-Fi..."
@@ -895,6 +916,7 @@ function Test-BasicsKeyboard
     Start-Process -FilePath "www.keyboardtester.com/tester.html"
     # Wait a bit for the page to load, then disconnect from Wi-Fi
     Write-Host -ForegroundColor White "Disconnecting from Neumont Wi-Fi..."
+    Write-Host
     Start-Sleep -Seconds 3
     netsh wlan disconnect
 
@@ -929,6 +951,9 @@ function Test-BasicsCursor
     $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Use the trackpad to move the cursor, left click, right click, and scroll."
+    Write-Host -ForegroundColor White "In the browser window, try pinch-zooming and dragging the page around in a circle with 2 fingers."
+    Write-Host -ForegroundColor White "Finally, try swapping desktops by swiping with 4 fingers."
+    Write-Host
 
     $response = Get-KeypressResponse -Prompt "Did the trackpad work normally? (Y/N): " -Options "y","Y","n","N"
     $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
@@ -949,6 +974,7 @@ function Test-BasicsCursor
         $trackpointValueObj = $trackpointObj.Value
         # If we should also test the touch display.
         Write-Host -ForegroundColor White "Use the TrackPoint to move the cursor, left click, right click, and scroll."
+        Write-Host
         $response = Get-KeypressResponse -Prompt "Did the TrackPoint work normally? (Y/N): " -Options "y","Y","n","N"
         $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
 
@@ -979,6 +1005,9 @@ function Test-BasicsCamera
     
     $resultObj = $TestObj.Results | Where-Object -Property "Name" -EQ -Value "Camera Works"
     $valueObj = $resultObj.Value
+
+    Write-Host -ForegroundColor White "Follow the instructions on the webpage to test the webcam. Ensure that the video is clear and motion is smooth."
+    Write-Host
    
     netsh wlan connect name=Neumont
     Write-Host -ForegroundColor White "Connecting to Neumont Wi-Fi..."
@@ -986,6 +1015,7 @@ function Test-BasicsCamera
     Start-Process -FilePath "https://webcamtests.com/"
     # Wait a bit for the page to load, then disconnect from Wi-Fi
     Write-Host -ForegroundColor White "Disconnecting from Neumont Wi-Fi..."
+    Write-Host
     Start-Sleep -Seconds 3
     netsh wlan disconnect
 
@@ -1022,6 +1052,7 @@ function Test-BasicsMic
 
     Write-Host -ForegroundColor White -BackgroundColor Black "CONNECT HEADPHONES BEFORE STARTING"
     Write-Host -ForegroundColor White "On the webpage, click `"Check Microphone`", then turn up the playback volume with the slider in the upper left corner of the box."
+    Write-Host
    
     netsh wlan connect name=Neumont
     Write-Host -ForegroundColor White "Connecting to Neumont Wi-Fi..."
@@ -1029,6 +1060,7 @@ function Test-BasicsMic
     Start-Process -FilePath "https://webcammictest.com/check-mic.html"
     # Wait a bit for the page to load, then disconnect from Wi-Fi
     Write-Host -ForegroundColor White "Disconnecting from Neumont Wi-Fi..."
+    Write-Host
     Start-Sleep -Seconds 3
     netsh wlan disconnect
 
@@ -1064,6 +1096,7 @@ function Test-BasicsPhysical
     $valueObj = $resultObj.Value
 
     Write-Host -ForegroundColor White "Push down on the machine's keyboard, then pick the machine up and twist the chassis from the corners."
+    Write-Host
 
     $response = Get-KeypressResponse -Prompt "Is the machine still operating normally? (Y/N): " -Options "y","Y","n","N"
     $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
