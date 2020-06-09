@@ -86,7 +86,7 @@
     }
 
     if($startNewRun) {
-        $resultData = New-ResultData -FilePath "$DBDirectoryPath\$dateString-$timeString-$($systemInfo.SerialNumber)-results.json" -SysInfo $systemInfo
+        $resultData = New-ResultData -FilePath "$ResultDataDirectoryPath\$dateString-$timeString-$($systemInfo.SerialNumber)-results.json" -SysInfo $systemInfo
     }
 
     Write-Host -ForegroundColor Cyan "The transcript of this run is being saved to $($resultData.FilePath)"
