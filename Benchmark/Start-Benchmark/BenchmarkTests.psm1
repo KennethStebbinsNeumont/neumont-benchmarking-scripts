@@ -587,6 +587,10 @@ function Test-WinMemDiag
         Write-Host
 
         Start-Process -FilePath "C:\Windows\system32\MdSched.exe" -WorkingDirectory "C:\Windows\system32" | Out-Null
+
+        Write-Host -ForegroundColor White "Press ENTER to exit..."
+        Read-Host | Out-Null
+        exit 0
     } elseif($response -eq 'y' -or $response -eq 'Y') {
         # If we're returning after rebooting
         $response = Get-KeypressResponse -Prompt "Did the test pass? (Y/N/(S)kip): " -Options 'y','Y','n','N','s','S'
