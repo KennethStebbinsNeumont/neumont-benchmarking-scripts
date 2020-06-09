@@ -574,7 +574,7 @@
         "CommandName": "BasicsMic",
         "Results": [
             {
-                "Name": "Camera Works",
+                "Name": "Mic Works",
                 "Description": "The microphone is detected by Windows and sounds clear.",
                 "Type": "Boolean",
                 "Values": [
