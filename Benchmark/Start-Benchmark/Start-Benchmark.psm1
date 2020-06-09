@@ -4,6 +4,7 @@
     Param(
         [String]$DBDirectoryPath,
         [String]$ResultDataFilePath,
+        [String]$ResultDataDirectoryPath,
         [String]$TestDefinitionsPath,
         [Switch]$RestartTest
     )
@@ -16,6 +17,10 @@
         $DBDirectoryPath = (Get-Location).Path
     }
 
+    if($null -eq $ResultDataDirectoryPath) {
+        $ResultDataDirectoryPath = $DBDirectoryPath
+    }
+
     if($null -eq $TestDefinitionsPath) {
         $TestDefinitionsPath = "$DBDirectoryPath\tests.json"
     }
@@ -26,7 +31,7 @@
         $resultData = Get-ResultData -FilePath $ResultDataFilePath
     } else {
         # If a file path was not given
-        $matchedFiles = Get-ChildItem -LiteralPath $DBDirectoryPath | Where-Object {$_.Name -match "\d{8}-\d{6}-$($systemInfo.SerialNumber)-results\.json"}
+        $matchedFiles = Get-ChildItem -LiteralPath $ResultDataDirectoryPath | Where-Object {$_.Name -match "\d{8}-\d{6}-$($systemInfo.SerialNumber)-results\.json"}
 
         if($null -ne $matchedFiles) {
             if($matchedFiles -is [System.Array]) {
