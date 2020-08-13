@@ -582,8 +582,8 @@ function Test-WinMemDiag
     if($response -eq 'n' -or $response -eq 'N') {
         # If the test hasn't been started yet
 
-        Write-Host -ForegroundColor White "Wait until the test completes, then indicate whether the test passed."
-        Write-Host -ForegroundColor White "This test indicates whether it passed via a notification in the notification center. It may take a few minutes to appear after rebooting."
+        Write-Host -ForegroundColor White "Wait until the test completes, then wait for the machine to reboot."
+        Write-Host -ForegroundColor White "After the computer starts, open Event Viewer and look for entries in the System log from MemoryDiagnostic-Results."
         Write-Host
 
         Start-Process -FilePath "C:\Windows\system32\MdSched.exe" -WorkingDirectory "C:\Windows\system32" | Out-Null
@@ -593,6 +593,9 @@ function Test-WinMemDiag
         exit 0
     } elseif($response -eq 'y' -or $response -eq 'Y') {
         # If we're returning after rebooting
+        $process = Start-Process -FilePath "C:\Windows\system32\eventvwr.msc" -WorkingDirectory "C:\Windows\system32" -PassThru
+
+        Write-Host -ForegroundColor White "Look for entries in the System log from MemoryDiagnostic-Results."
         $response = Get-KeypressResponse -Prompt "Did the test pass? (Y/N/(S)kip): " -Options 'y','Y','n','N','s','S'
         $commentResponse = Read-Host -Prompt "Do you have any comments? (Leave blank to skip)"
 
@@ -609,6 +612,11 @@ function Test-WinMemDiag
     
         if($null -ne $commentResponse -and "" -ne $commentResponse) {
             Add-Member -InputObject $valueObj -NotePropertyName Comment -NotePropertyValue $commentResponse
+        }
+
+        if(!$process.HasExited) {
+            Write-Host -ForegroundColor Cyan "Please close Event Viewer to continue..."
+            $process.WaitForExit()
         }
     }
 
